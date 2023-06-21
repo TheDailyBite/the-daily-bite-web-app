@@ -1,5 +1,10 @@
 FROM python:3.9-slim-buster
 
+RUN adduser --disabled-password pynecone
+
+ENV NODE_VERSION=v20.0.0
+ENV PCCONFIG_DOCKER=pcconfig_docker.py
+
 ENV LANG=C.UTF-8 \
   LC_ALL=C.UTF-8 \
   PATH="${PATH}:/root/.poetry/bin"
@@ -7,19 +12,38 @@ ENV LANG=C.UTF-8 \
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   curl \
+  xz-utils \
+  unzip \
   && rm -rf /var/lib/apt/lists/*
+
+# Download latest nodejs binary
+RUN curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz -O
+
+# Extract & install
+RUN tar -xf node-${NODE_VERSION}-linux-x64.tar.xz
+RUN ln -s /node-${NODE_VERSION}-linux-x64/bin/node /usr/local/bin/node
+RUN ln -s /node-${NODE_VERSION}-linux-x64/bin/npm /usr/local/bin/npm
+RUN ln -s /node-${NODE_VERSION}-linux-x64/bin/npx /usr/local/bin/npx  
 
 COPY pyproject.toml ./
 
 # Install Poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | POETRY_HOME=/opt/poetry python && \
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
     cd /usr/local/bin && \
     ln -s /opt/poetry/bin/poetry && \
     poetry config virtualenvs.create false
 
-# Allow installing dev dependencies to run tests
-ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
+RUN --mount=type=ssh poetry install --no-root --without dev
 
-CMD mkdir -p /workspace
-WORKDIR /workspace
+CMD mkdir -p /app
+COPY --chown=pynecone . /app
+COPY --chown=pynecone $PCCONFIG_DOCKER /app/pcconfig.py
+USER pynecone
+WORKDIR /app
+ENV BUN_INSTALL="/app/.bun"
+RUN pc init
+
+CMD ["pc","run" , "--env", "prod"]
+
+EXPOSE 3000
+EXPOSE 8000

@@ -10,11 +10,11 @@ VERSION := latest
 #* Poetry
 .PHONY: poetry-download
 poetry-download:
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) -
+	curl -sSL https://install.python-poetry.org | $(PYTHON) -
 
 .PHONY: poetry-remove
 poetry-remove:
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) - --uninstall
+	curl -sSL https://install.python-poetry.org | $(PYTHON) - --uninstall
 
 #* Installation
 .PHONY: install
@@ -56,7 +56,7 @@ mypy:
 .PHONY: check-safety
 check-safety:
 	poetry check
-	poetry run safety check --full-report --ignore=51457 # ignoring CVE-2022-42969 for py <= 1.11.0 which is installed via pytest. No upgrade available.
+	poetry run safety check --full-report --ignore=51457 --ignore=51668 # ignoring CVE-2022-42969 for py <= 1.11.0 which is installed via pytest. No upgrade available. Ignoring Sqlalchemy < 2.0.0b1 vuln due to blocker on pynecone.
 	poetry run bandit -ll --recursive the_daily_bite_web_app tests
 
 .PHONY: lint
@@ -76,6 +76,16 @@ docker-build:
 	docker build \
 		-t $(IMAGE):$(VERSION) . \
 		-f ./docker/Dockerfile --no-cache
+
+#* Docker
+# Example: make docker-build-with-cache VERSION=latest
+# Example: make docker-build-with-cache IMAGE=some_name VERSION=0.1.0
+.PHONY: docker-build-with-cache
+docker-build-with-cache:
+	@echo Building docker $(IMAGE):$(VERSION) ...
+	docker build \
+		-t $(IMAGE):$(VERSION) . \
+		-f ./docker/Dockerfile	
 
 # Example: make docker-remove VERSION=latest
 # Example: make docker-remove IMAGE=some_name VERSION=0.1.0
