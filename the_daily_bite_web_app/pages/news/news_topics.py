@@ -1,7 +1,6 @@
 import pynecone as pc
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.base_state import State
 from the_daily_bite_web_app.templates import webpage
 
 

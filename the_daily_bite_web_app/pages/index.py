@@ -1,19 +1,9 @@
 import pynecone as pc
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.base_state import State
+from the_daily_bite_web_app.constants import INDEX_PATH
+from the_daily_bite_web_app.states import IndexState
 from the_daily_bite_web_app.templates import webpage
-
-
-class IndexState(State):
-    """Hold the state for the home page."""
-
-    # Whether to show the call to action.
-    show_c2a: bool = True
-
-    def close_c2a(self):
-        """Close the call to action."""
-        self.show_c2a = False
 
 
 def landing():
@@ -95,7 +85,7 @@ def c2a():
     )
 
 
-@webpage(path="/")
+@webpage(path=INDEX_PATH)
 def index() -> pc.Component:
     """Get the main The Daily Bite landing page."""
     return pc.box(

@@ -3,27 +3,16 @@
 import pynecone as pc
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.base_state import State
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.components.sidebar import sidebar as sb
 from the_daily_bite_web_app.pages.index import index
 from the_daily_bite_web_app.pages.news import news_topics, news_topics_subscribe
+from the_daily_bite_web_app.states import NavbarState
 
 try:
     from the_daily_bite_web_app.tsclient import client
 except ImportError:
     client = None
-
-
-class NavbarState(State):
-    """The state for the navbar component."""
-
-    # Whether the sidebar is open.
-    sidebar_open: bool = False
-
-    def toggle_sidebar(self):
-        """Toggle the sidebar open state."""
-        self.sidebar_open = not self.sidebar_open
 
 
 # Styles to use for the navbar.
