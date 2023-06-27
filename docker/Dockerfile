@@ -14,6 +14,7 @@ RUN apt-get update && \
   curl \
   xz-utils \
   unzip \
+  vim \
   && rm -rf /var/lib/apt/lists/*
 
 # Download latest nodejs binary

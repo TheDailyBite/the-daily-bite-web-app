@@ -33,6 +33,8 @@ classifiers = [  #! Update me
 [tool.poetry.dependencies]
 python = "^3.9"
 pynecone = "^0.1.34"
+boto3 = "^1.26.77"
+requests = "^2.31.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"

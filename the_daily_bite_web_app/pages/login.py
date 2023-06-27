@@ -4,7 +4,6 @@ from the_daily_bite_web_app import styles
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.constants import LOGIN_PATH
 from the_daily_bite_web_app.states import LoginState
-from the_daily_bite_web_app.templates import webpage
 
 
 def login():

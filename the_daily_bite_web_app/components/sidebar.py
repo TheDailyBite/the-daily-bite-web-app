@@ -61,7 +61,7 @@ def get_sidebar_items_news():
             news,
             children=[
                 news.news_topics,
-                news.news_topics_subscribe,
+                news.newspaper,
             ],
         ),
     ]

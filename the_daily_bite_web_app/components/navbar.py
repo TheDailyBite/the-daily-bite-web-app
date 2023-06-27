@@ -6,7 +6,7 @@ from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.components.sidebar import sidebar as sb
 from the_daily_bite_web_app.pages.index import index
-from the_daily_bite_web_app.pages.news import news_topics, news_topics_subscribe
+from the_daily_bite_web_app.pages.news import news_topics, newspaper
 from the_daily_bite_web_app.states import NavbarState
 
 try:
@@ -68,9 +68,9 @@ def navbar(sidebar: pc.Component = None) -> pc.Component:
                 pc.tablet_and_desktop(
                     pc.link(
                         pc.text(
-                            "Subscribe to News Topics",
+                            "Newspaper",
                         ),
-                        href=news_topics_subscribe.path,
+                        href=newspaper.path,
                         **button_style,
                     ),
                 ),

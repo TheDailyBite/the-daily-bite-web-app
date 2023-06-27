@@ -7,6 +7,5 @@ class ThedailybitewebappConfig(pc.Config):
 
 config = ThedailybitewebappConfig(
     app_name="the_daily_bite_web_app",
-    db_url="sqlite:///pynecone.db",
     env=pc.Env.DEV,
 )
