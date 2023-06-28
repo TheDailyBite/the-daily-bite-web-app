@@ -45,12 +45,12 @@ class NewsTopicsState(BaseState):
         """Update the user news topic subscriptions."""
         if self.user and self.user.user_id:
             news_topics_to_unsubscribe = [
-                news_topic
+                news_topic.topic_id
                 for news_topic in self.news_topics
                 if news_topic.is_user_subscribed and news_topic.is_selected
             ]
             news_topics_to_subscribe = [
-                news_topic
+                news_topic.topic_id
                 for news_topic in self.news_topics
                 if not news_topic.is_user_subscribed and news_topic.is_selected
             ]
@@ -75,6 +75,7 @@ class NewsTopicsState(BaseState):
                 function_url=NEWS_SERVICE_SUBSCRIBE_NEWS_TOPICS_URL,
             )
             self.refresh_user_news_topics()
+            return pc.window_alert("News topics subscriptions updated successfully")
 
     # TODO - remove
     def get_test_user_news_topics(self) -> List[NewsTopic]:

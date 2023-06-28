@@ -54,8 +54,12 @@ def invoke_function(
             processed_response = json.loads(response["Payload"].read())
             return process_lambda_response(function_name, processed_response)
         else:
+            url = f"{function_url}/2015-03-31/functions/function/invocations"
+            logger.info(
+                f"Invoking function in local testing at url {url} with params {function_params}"
+            )
             response = requests.post(
-                f"{function_url}/2015-03-31/functions/function/invocations",
+                url,
                 json=function_params,
             )
             if response.status_code != 200:
@@ -64,7 +68,6 @@ def invoke_function(
                 )
             processed_response = response.json()
             return process_lambda_response(function_name, processed_response)
-        logger.info(f"Invoked function {function_name}. Response: {response}")
     except ClientError as e:
         logger.error(f"Couldn't invoke function {function_name}. Error: {e}")
         raise InvokeFunctionException(function_name)

@@ -15,16 +15,17 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
             news_topic.is_user_subscribed,
             pc.cond(
                 news_topic.is_selected,
-                pc.icon(tag="minus", color="#666"),
+                pc.icon(tag="check_circle", color="#fff"),
                 pc.icon(tag="check_circle", color="#666"),
             ),  # is_user_subscribed
             pc.cond(
-                news_topic.is_selected, pc.icon(tag="add", color="#666"), None
+                news_topic.is_selected,
+                pc.icon(tag="check_circle", color="#666"),
+                pc.icon(tag="check_circle", color="#00000000"),
             ),  # not is_user_subscribed
         ),
         pc.vstack(
             pc.text(news_topic.topic),
-            pc.text(news_topic.last_publishing_date),
             pc.box(
                 pc.text(news_topic.category),
                 pc.text(" · ", margin_x="0.3rem"),
@@ -43,6 +44,7 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
         border_radius="30px",
         border="1px solid #ddd",
         on_click=NewsTopicsState.toggle_news_topic_selected(idx),
+        _hover={"bg": selected_background_color},
     )
 
 
