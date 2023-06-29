@@ -10,9 +10,8 @@ import boto3
 from the_daily_bite_web_app.config import (
     DEFAULT_LOGGER_NAME,
     DEFAULT_NAMESPACE,
-    LOCAL_TESTING,
-    REGION_NAME,
 )
+from news_aggregator_data_access_layer.config import REGION_NAME, LOCAL_TESTING
 
 loggers: Mapping[str, logging.Logger] = {}
 

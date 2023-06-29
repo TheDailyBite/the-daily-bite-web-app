@@ -72,6 +72,7 @@ update-dev-deps:
 docker-build:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
+		--ssh default=${SSH_AUTH_SOCK} \
 		-t $(IMAGE):$(VERSION) . \
 		-f ./docker/Dockerfile --no-cache
 
@@ -82,6 +83,7 @@ docker-build:
 docker-build-with-cache:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
+		--ssh default=${SSH_AUTH_SOCK} \
 		-t $(IMAGE):$(VERSION) . \
 		-f ./docker/Dockerfile	
 

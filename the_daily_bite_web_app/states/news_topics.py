@@ -4,76 +4,132 @@ from typing import List, Optional
 
 import pynecone as pc
 
-from the_daily_bite_web_app.config import (
-    GET_NEWS_TOPICS_FUNCTION_NAME,
-    NEWS_SERVICE_GET_NEWS_TOPICS_URL,
-    NEWS_SERVICE_SUBSCRIBE_NEWS_TOPICS_URL,
-    SUBSCRIBE_NEWS_TOPICS_FUNCTION_NAME,
-)
 from the_daily_bite_web_app.utils.aws_lambda import invoke_function
+from the_daily_bite_web_app.config import GENERATE_DUMMY_DATA
+from news_aggregator_data_access_layer.models.dynamodb import (
+    UserTopicSubscriptions,
+    NewsTopics,
+    get_current_dt_utc_attribute
+)
+from news_aggregator_data_access_layer.utils.telemetry import setup_logger
 
 from .base import BaseState
 from .models import NewsTopic
 
+logger = setup_logger(__name__)
 
 class NewsTopicsState(BaseState):
     """The news topics state."""
 
     news_topics: List[NewsTopic] = []
     is_loaded: bool = False
+    is_refreshing_news_topics: bool = True
+    is_updating_user_news_topic_subscriptions: bool = False
+
+    def refreshing_news_topics(self):
+        self.is_refreshing_news_topics = True
+
+    def updating_news_topic_subscriptions(self):
+        self.is_updating_user_news_topic_subscriptions = True
 
     def refresh_user_news_topics(self):
         """Get the news topics."""
         if self.user and self.user.user_id:
+            logger.info(f"Value: {self.is_refreshing_news_topics}")
+            self.refreshing_news_topics()
+            logger.info(f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_news_topics}...")
+            # TODO - to test circular progress
+            import time
+            time.sleep(5)
             # TODO - can remove this
-            if not GET_NEWS_TOPICS_FUNCTION_NAME and not NEWS_SERVICE_GET_NEWS_TOPICS_URL:
-                print(
-                    f"GET_NEWS_TOPICS_FUNCTION_NAME and NEWS_SERVICE_GET_NEWS_TOPICS_URL are not set. Getting dummy data"
+            if GENERATE_DUMMY_DATA:
+                logger.info(
+                    f"GENERATE_DUMMY_DATA is set. Getting dummy data"
                 )
                 self.news_topics = self.get_test_user_news_topics()
-                return
-            response = invoke_function(
-                GET_NEWS_TOPICS_FUNCTION_NAME,
-                {"user_id": self.user.user_id},
-                function_url=NEWS_SERVICE_GET_NEWS_TOPICS_URL,
-            )
-            if response["statusCode"] == 200:
-                body = response["body"]
-                self.news_topics = [NewsTopic.parse_obj(r) for r in body["results"]]
+            else:
+                try:
+                    logger.info(f"Getting news topics for user {self.user.user_id}...")
+                    user_news_topics = UserTopicSubscriptions.query(self.user.user_id)
+                    user_news_topic_ids = [user_news_topic.topic_id for user_news_topic in user_news_topics]
+                    news_topics = NewsTopics.scan()
+                    published_news_topics = [
+                        {
+                            "topic_id": news_topic.topic_id,
+                            "topic": news_topic.topic,
+                            "category": news_topic.category,
+                            "last_publishing_date": news_topic.last_publishing_date.isoformat()
+                            if news_topic.last_publishing_date
+                            else "",
+                            "is_user_subscribed": news_topic.topic_id in user_news_topic_ids,
+                        }
+                        for news_topic in news_topics
+                        if news_topic.is_published
+                    ]
+                    self.news_topics = [NewsTopic.parse_obj(r) for r in published_news_topics]
+                except Exception as e:
+                    logger.error(f"Error getting news topics: {e}", exc_info=True)
+                    # TODO - emit metric
+                    self.news_topics = []
+            self.is_refreshing_news_topics = False
+                
 
     def update_user_news_topic_subscriptions(self):
         """Update the user news topic subscriptions."""
         if self.user and self.user.user_id:
-            news_topics_to_unsubscribe = [
-                news_topic.topic_id
-                for news_topic in self.news_topics
-                if news_topic.is_user_subscribed and news_topic.is_selected
-            ]
-            news_topics_to_subscribe = [
-                news_topic.topic_id
-                for news_topic in self.news_topics
-                if not news_topic.is_user_subscribed and news_topic.is_selected
-            ]
-            if not news_topics_to_unsubscribe and not news_topics_to_subscribe:
-                return
+            self.updating_news_topic_subscriptions()
             # TODO - can remove this
-            if (
-                not SUBSCRIBE_NEWS_TOPICS_FUNCTION_NAME
-                and not NEWS_SERVICE_SUBSCRIBE_NEWS_TOPICS_URL
-            ):
-                print(
-                    f"SUBSCRIBE_NEWS_TOPICS_FUNCTION_NAME and NEWS_SERVICE_SUBSCRIBE_NEWS_TOPICS_URL are not set. Not subscribing. Unsubscribe values: {news_topics_to_unsubscribe}; Subscribe values: {news_topics_to_subscribe}"
+            if GENERATE_DUMMY_DATA:
+                logger.info(
+                    f"GENERATE_DUMMY_DATA is set. Fake update user news topic subscriptions"
                 )
-                return
-            response = invoke_function(
-                SUBSCRIBE_NEWS_TOPICS_FUNCTION_NAME,
-                {
-                    "user_id": self.user.user_id,
-                    "news_topics_to_unsubscribe": news_topics_to_unsubscribe,
-                    "news_topics_to_subscribe": news_topics_to_subscribe,
-                },
-                function_url=NEWS_SERVICE_SUBSCRIBE_NEWS_TOPICS_URL,
-            )
+                import time
+                time.sleep(2)
+            else:
+                news_topics_to_unsubscribe = [
+                    news_topic.topic_id
+                    for news_topic in self.news_topics
+                    if news_topic.is_user_subscribed and news_topic.is_selected
+                ]
+                news_topics_to_subscribe = [
+                    news_topic.topic_id
+                    for news_topic in self.news_topics
+                    if not news_topic.is_user_subscribed and news_topic.is_selected
+                ]
+                if not news_topics_to_unsubscribe and not news_topics_to_subscribe:
+                    return
+                try:
+                    for topic_id in news_topics_to_unsubscribe:
+                        logger.info(f"Unsubscribing user id {self.user.user_id} from topic id {topic_id}")
+                        try:
+                            UserTopicSubscriptions(self.user.user_id, topic_id).delete()
+                        except Exception as e:
+                            logger.error(
+                                f"Failed to unsubscribe user id {self.user.user_id} from topic id {topic_id} with error: {e}",
+                                exc_info=True,
+                            )
+                            # TODO - emit metric
+                            continue
+                    for topic_id in news_topics_to_subscribe:
+                        logger.info(f"Subscribing user id {self.user.user_id} to topic id {topic_id}")
+                        try:
+                            UserTopicSubscriptions(
+                                self.user.user_id, topic_id, date_subscribed=get_current_dt_utc_attribute()
+                            ).save()
+                        except Exception as e:
+                            logger.error(
+                                f"Failed to subscribe user id {self.user.user_id} to topic id {topic_id} with error: {e}",
+                                exc_info=True,
+                            )
+                            # TODO - emit metric
+                            continue
+                except Exception as e:
+                    logger.error(f"Error updating news topic subscriptions: {e}", exc_info=True)
+                    self.is_updating_user_news_topic_subscriptions = False
+                    # TODO - emit metric
+                    self.refresh_user_news_topics()
+                    return pc.window_alert("Error updating news topic subscriptions. Please try again.")
+            self.is_updating_user_news_topic_subscriptions = False
             self.refresh_user_news_topics()
             return pc.window_alert("News topics subscriptions updated successfully")
 
@@ -122,7 +178,10 @@ class NewsTopicsState(BaseState):
 
     def on_load(self):
         """Load the news topics."""
+        logger.info("Loading news topics...")
+        self.refresh_user_news_topics()         
         if self.is_loaded is False:
-            # self.refresh_user_news_topics_test()
-            self.refresh_user_news_topics()
-            self.is_loaded = True
+            pass
+            #self.refresh_user_news_topics()            
+        #     self.refresh_user_news_topics()
+        #     self.is_loaded = True

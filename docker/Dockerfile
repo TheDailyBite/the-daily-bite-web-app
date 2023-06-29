@@ -15,7 +15,10 @@ RUN apt-get update && \
   xz-utils \
   unzip \
   vim \
+  openssh-server openssh-client \
   && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 # Download latest nodejs binary
 RUN curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz -O
