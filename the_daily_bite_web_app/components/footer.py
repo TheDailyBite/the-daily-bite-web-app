@@ -38,8 +38,8 @@ def footer(style=footer_style):
                         justify="space-between",
                         color=styles.LIGHT_TEXT_COLOR,
                         padding_left="0.5em",
-                    ),        
-                ),   
+                    ),
+                ),
                 pc.vstack(
                     pc.text("Resources", color=styles.SUBHEADING_COLOR),
                     pc.link(

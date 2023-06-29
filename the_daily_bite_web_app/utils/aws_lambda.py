@@ -3,10 +3,10 @@ import json
 import boto3
 import requests
 from botocore.exceptions import ClientError
+from news_aggregator_data_access_layer.config import LOCAL_TESTING, REGION_NAME
 
 from the_daily_bite_web_app.exceptions import InvokeFunctionException
 from the_daily_bite_web_app.utils.telemetry import setup_logger
-from news_aggregator_data_access_layer.config import REGION_NAME, LOCAL_TESTING
 
 logger = setup_logger(__name__)
 

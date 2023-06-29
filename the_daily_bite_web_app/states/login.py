@@ -1,11 +1,9 @@
 import pynecone as pc
+from news_aggregator_data_access_layer.models.dynamodb import PreviewUsers
 
 from the_daily_bite_web_app.constants import INDEX_PATH
 from the_daily_bite_web_app.utils.aws_lambda import invoke_function
 from the_daily_bite_web_app.utils.telemetry import setup_logger
-from news_aggregator_data_access_layer.models.dynamodb import (
-    PreviewUsers,
-)
 
 from .base import BaseState
 from .models import User
@@ -22,7 +20,7 @@ class LoginState(BaseState):
         logger.info(f"Logging in with user id {self.user_id_field}...")
         if self.user_id_field:
             # TODO - remove this. It is temporary and allows for local testing
-            if self.user_id_field == "abc": # "21286987-0dd3-44c1-88b6-a8361e37823c":
+            if self.user_id_field == "abc":  # "21286987-0dd3-44c1-88b6-a8361e37823c":
                 user = User(user_id=self.user_id_field, name="Michael the Admin")
                 logger.info("Logged in as %s.", user.name)
                 self.user = user

@@ -3,20 +3,21 @@
 from typing import List, Optional
 
 import pynecone as pc
-
-from the_daily_bite_web_app.utils.aws_lambda import invoke_function
-from the_daily_bite_web_app.config import GENERATE_DUMMY_DATA
 from news_aggregator_data_access_layer.models.dynamodb import (
-    UserTopicSubscriptions,
     NewsTopics,
-    get_current_dt_utc_attribute
+    UserTopicSubscriptions,
+    get_current_dt_utc_attribute,
 )
 from news_aggregator_data_access_layer.utils.telemetry import setup_logger
+
+from the_daily_bite_web_app.config import GENERATE_DUMMY_DATA
+from the_daily_bite_web_app.utils.aws_lambda import invoke_function
 
 from .base import BaseState
 from .models import NewsTopic
 
 logger = setup_logger(__name__)
+
 
 class NewsTopicsState(BaseState):
     """The news topics state."""
@@ -37,21 +38,24 @@ class NewsTopicsState(BaseState):
         if self.user and self.user.user_id:
             logger.info(f"Value: {self.is_refreshing_news_topics}")
             self.refreshing_news_topics()
-            logger.info(f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_news_topics}...")
+            logger.info(
+                f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_news_topics}..."
+            )
             # TODO - to test circular progress
             import time
+
             time.sleep(5)
             # TODO - can remove this
             if GENERATE_DUMMY_DATA:
-                logger.info(
-                    f"GENERATE_DUMMY_DATA is set. Getting dummy data"
-                )
+                logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
                 self.news_topics = self.get_test_user_news_topics()
             else:
                 try:
                     logger.info(f"Getting news topics for user {self.user.user_id}...")
                     user_news_topics = UserTopicSubscriptions.query(self.user.user_id)
-                    user_news_topic_ids = [user_news_topic.topic_id for user_news_topic in user_news_topics]
+                    user_news_topic_ids = [
+                        user_news_topic.topic_id for user_news_topic in user_news_topics
+                    ]
                     news_topics = NewsTopics.scan()
                     published_news_topics = [
                         {
@@ -72,7 +76,8 @@ class NewsTopicsState(BaseState):
                     # TODO - emit metric
                     self.news_topics = []
             self.is_refreshing_news_topics = False
-                
+        else:
+            logger.warning(f"User is not logged in. Cannot get news topics")
 
     def update_user_news_topic_subscriptions(self):
         """Update the user news topic subscriptions."""
@@ -84,6 +89,7 @@ class NewsTopicsState(BaseState):
                     f"GENERATE_DUMMY_DATA is set. Fake update user news topic subscriptions"
                 )
                 import time
+
                 time.sleep(2)
             else:
                 news_topics_to_unsubscribe = [
@@ -100,7 +106,9 @@ class NewsTopicsState(BaseState):
                     return
                 try:
                     for topic_id in news_topics_to_unsubscribe:
-                        logger.info(f"Unsubscribing user id {self.user.user_id} from topic id {topic_id}")
+                        logger.info(
+                            f"Unsubscribing user id {self.user.user_id} from topic id {topic_id}"
+                        )
                         try:
                             UserTopicSubscriptions(self.user.user_id, topic_id).delete()
                         except Exception as e:
@@ -111,10 +119,14 @@ class NewsTopicsState(BaseState):
                             # TODO - emit metric
                             continue
                     for topic_id in news_topics_to_subscribe:
-                        logger.info(f"Subscribing user id {self.user.user_id} to topic id {topic_id}")
+                        logger.info(
+                            f"Subscribing user id {self.user.user_id} to topic id {topic_id}"
+                        )
                         try:
                             UserTopicSubscriptions(
-                                self.user.user_id, topic_id, date_subscribed=get_current_dt_utc_attribute()
+                                self.user.user_id,
+                                topic_id,
+                                date_subscribed=get_current_dt_utc_attribute(),
                             ).save()
                         except Exception as e:
                             logger.error(
@@ -128,10 +140,14 @@ class NewsTopicsState(BaseState):
                     self.is_updating_user_news_topic_subscriptions = False
                     # TODO - emit metric
                     self.refresh_user_news_topics()
-                    return pc.window_alert("Error updating news topic subscriptions. Please try again.")
+                    return pc.window_alert(
+                        "Error updating news topic subscriptions. Please try again."
+                    )
             self.is_updating_user_news_topic_subscriptions = False
             self.refresh_user_news_topics()
             return pc.window_alert("News topics subscriptions updated successfully")
+        else:
+            logger.warning(f"User is not logged in. Cannot update news topic subscriptions")
 
     # TODO - remove
     def get_test_user_news_topics(self) -> List[NewsTopic]:
@@ -179,9 +195,9 @@ class NewsTopicsState(BaseState):
     def on_load(self):
         """Load the news topics."""
         logger.info("Loading news topics...")
-        self.refresh_user_news_topics()         
+        self.refresh_user_news_topics()
         if self.is_loaded is False:
             pass
-            #self.refresh_user_news_topics()            
+            # self.refresh_user_news_topics()
         #     self.refresh_user_news_topics()
         #     self.is_loaded = True

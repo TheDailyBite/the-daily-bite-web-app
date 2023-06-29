@@ -4,3 +4,4 @@ from .login import LoginState
 from .models import NewsTopic
 from .navbar import NavbarState
 from .news_topics import NewsTopicsState
+from .newspaper import NewspaperState

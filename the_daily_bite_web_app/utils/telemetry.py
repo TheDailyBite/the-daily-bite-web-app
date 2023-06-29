@@ -6,12 +6,9 @@ from collections.abc import Mapping
 from datetime import datetime, timezone
 
 import boto3
+from news_aggregator_data_access_layer.config import LOCAL_TESTING, REGION_NAME
 
-from the_daily_bite_web_app.config import (
-    DEFAULT_LOGGER_NAME,
-    DEFAULT_NAMESPACE,
-)
-from news_aggregator_data_access_layer.config import REGION_NAME, LOCAL_TESTING
+from the_daily_bite_web_app.config import DEFAULT_LOGGER_NAME, DEFAULT_NAMESPACE
 
 loggers: Mapping[str, logging.Logger] = {}
 

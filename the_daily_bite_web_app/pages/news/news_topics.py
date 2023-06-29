@@ -62,7 +62,8 @@ def news_topics() -> pc.Component:
             background_size="100%",
             background_color="#f3ec78",
         ),
-        pc.cond(NewsTopicsState.is_refreshing_news_topics,
+        pc.cond(
+            NewsTopicsState.is_refreshing_news_topics,
             pc.center(pc.circular_progress(is_indeterminate=True, size="100px")),
             pc.vstack(
                 pc.foreach(
@@ -72,10 +73,11 @@ def news_topics() -> pc.Component:
                 margin_top="2rem",
                 spacing="1rem",
                 align_items="left",
-            ),            
+            ),
         ),
         pc.center(
-            pc.cond(NewsTopicsState.is_updating_user_news_topic_subscriptions,
+            pc.cond(
+                NewsTopicsState.is_updating_user_news_topic_subscriptions,
                 pc.circular_progress(is_indeterminate=True, size="100px"),
                 pc.button(
                     "Update",
@@ -91,7 +93,10 @@ def news_topics() -> pc.Component:
                     font_weight="600",
                     border_radius="30px",
                     background="linear-gradient(90deg, #756AEE 0%, #EE756A 100%)",
-                    on_click=[NewsTopicsState.updating_news_topic_subscriptions, NewsTopicsState.update_user_news_topic_subscriptions],
+                    on_click=[
+                        NewsTopicsState.updating_news_topic_subscriptions,
+                        NewsTopicsState.update_user_news_topic_subscriptions,
+                    ],
                 ),
             ),
             margin_top="2rem",
