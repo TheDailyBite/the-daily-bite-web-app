@@ -1,6 +1,6 @@
 """The main the daily bite website."""
 
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import styles
 from the_daily_bite_web_app.constants import (
@@ -13,10 +13,10 @@ from the_daily_bite_web_app.middleware import CloseSidebarMiddleware
 from the_daily_bite_web_app.pages import index, login, news_topics, newspaper
 from the_daily_bite_web_app.states import BaseState, NewspaperState, NewsTopicsState
 
-on_load_all_pages = [BaseState.verify_login()]
+on_load_all_pages = [BaseState.verify_login]
 
 # Create the app.
-app = pc.App(
+app = rx.App(
     state=BaseState,  # TODO ?
     style=styles.BASE_STYLE,
     stylesheets=styles.STYLESHEETS,
@@ -35,7 +35,7 @@ app.add_page(
     title=news_topics.title,
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
-    on_load=[*on_load_all_pages, NewsTopicsState.on_load()],  # TODO - add on_load
+    on_load=[*on_load_all_pages, NewsTopicsState.on_load],  # TODO - add on_load
 )
 
 app.add_page(
@@ -44,7 +44,7 @@ app.add_page(
     title=newspaper.title,
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
-    on_load=[*on_load_all_pages, NewspaperState.on_load_newspaper()],  # TODO - add on_load
+    on_load=[*on_load_all_pages, NewspaperState.on_load_newspaper],  # TODO - add on_load
 )
 
 app.add_page(
@@ -57,7 +57,6 @@ app.add_page(
 )
 
 
-# Add the middleware.
 app.add_middleware(CloseSidebarMiddleware(), index=0)
 
 # Run the app.

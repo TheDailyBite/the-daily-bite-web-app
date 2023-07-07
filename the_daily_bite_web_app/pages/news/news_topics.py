@@ -1,4 +1,4 @@
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH
@@ -10,26 +10,26 @@ from the_daily_bite_web_app.templates import webpage
 def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
     selected_background_color = "#756aee59"
     not_selected_background_color = "#fff"
-    return pc.box(
-        pc.cond(
+    return rx.box(
+        rx.cond(
             news_topic.is_user_subscribed,
-            pc.cond(
+            rx.cond(
                 news_topic.is_selected,
-                pc.icon(tag="check_circle", color="#fff"),
-                pc.icon(tag="check_circle", color="#666"),
+                rx.icon(tag="check_circle", color="#fff"),
+                rx.icon(tag="check_circle", color="#666"),
             ),  # is_user_subscribed
-            pc.cond(
+            rx.cond(
                 news_topic.is_selected,
-                pc.icon(tag="check_circle", color="#666"),
-                pc.icon(tag="check_circle", color="#00000000"),
+                rx.icon(tag="check_circle", color="#666"),
+                rx.icon(tag="check_circle", color="#00000000"),
             ),  # not is_user_subscribed
         ),
-        pc.vstack(
-            pc.text(news_topic.topic),
-            pc.box(
-                pc.text(news_topic.category),
-                pc.text(" · ", margin_x="0.3rem"),
-                pc.text("last publishing date: " + news_topic.last_publishing_date),
+        rx.vstack(
+            rx.text(news_topic.topic),
+            rx.box(
+                rx.text(news_topic.category),
+                rx.text(" · ", margin_x="0.3rem"),
+                rx.text("last publishing date: " + news_topic.last_publishing_date),
                 display="flex",
                 font_size="0.8rem",
                 color="#666",
@@ -37,7 +37,7 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
             spacing="0.3rem",
             align_items="center",
         ),
-        background_color=pc.cond(
+        background_color=rx.cond(
             news_topic.is_selected, selected_background_color, not_selected_background_color
         ),
         padding="1rem",
@@ -49,10 +49,10 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
 
 
 @webpage(path=NEWS_TOPICS_PATH)
-def news_topics() -> pc.Component:
+def news_topics() -> rx.Component:
     """Get the news topics page."""
-    return pc.container(
-        pc.text(
+    return rx.container(
+        rx.text(
             "Subscribe to your favorite News Topics to begin reading its published articles.",
             font_size="30px",
             text_align="center",
@@ -62,11 +62,11 @@ def news_topics() -> pc.Component:
             background_size="100%",
             background_color="#f3ec78",
         ),
-        pc.cond(
+        rx.cond(
             NewsTopicsState.is_refreshing_news_topics,
-            pc.center(pc.circular_progress(is_indeterminate=True, size="100px")),
-            pc.vstack(
-                pc.foreach(
+            rx.center(rx.circular_progress(is_indeterminate=True, size="100px")),
+            rx.vstack(
+                rx.foreach(
                     NewsTopicsState.news_topics,
                     lambda news_topic, idx: to_ui_news_topic(news_topic, idx),
                 ),
@@ -75,11 +75,11 @@ def news_topics() -> pc.Component:
                 align_items="left",
             ),
         ),
-        pc.center(
-            pc.cond(
+        rx.center(
+            rx.cond(
                 NewsTopicsState.is_updating_user_news_topic_subscriptions,
-                pc.circular_progress(is_indeterminate=True, size="100px"),
-                pc.button(
+                rx.circular_progress(is_indeterminate=True, size="100px"),
+                rx.button(
                     "Update",
                     display="flex",
                     width="250px",

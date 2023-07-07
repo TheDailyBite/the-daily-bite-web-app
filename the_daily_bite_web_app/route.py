@@ -5,8 +5,8 @@ from typing import Callable, Union
 
 import inspect
 
-import pynecone as pc
-from pynecone.base import Base
+import reflex as rx
+from reflex.base import Base
 
 
 class Route(Base):
@@ -19,7 +19,7 @@ class Route(Base):
     title: Union[str, None] = None
 
     # The component to render for the route.
-    component: Union[pc.Component, Callable[[], pc.Component]]
+    component: Union[rx.Component, Callable[[], rx.Component]]
 
 
 def get_path(component_fn: Callable):

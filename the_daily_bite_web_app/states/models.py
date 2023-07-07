@@ -1,14 +1,14 @@
 from typing import Optional
 
-import pynecone as pc
+import reflex as rx
 
 
-class User(pc.Model):
+class User(rx.Model):
     user_id: str
     name: str
 
 
-class NewsTopic(pc.Model):
+class NewsTopic(rx.Model):
     topic_id: str
     topic: str
     category: Optional[str]
@@ -17,7 +17,7 @@ class NewsTopic(pc.Model):
     is_selected: bool = False
 
 
-class NewsArticle(pc.Model):
+class NewsArticle(rx.Model):
     article_id: str
     title: str
     full_summary_text: str
@@ -25,12 +25,12 @@ class NewsArticle(pc.Model):
     short_summary_text: str
 
 
-class ArticleSummarizationLength(pc.Model):
+class ArticleSummarizationLength(rx.Model):
     summarization_length: str
     is_selected: bool
 
 
-class NewspaperTopic(pc.Model):
+class NewspaperTopic(rx.Model):
     topic_id: str
     topic: str
     category: Optional[str]

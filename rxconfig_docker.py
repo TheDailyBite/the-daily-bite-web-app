@@ -1,9 +1,9 @@
 import os
 
-import pynecone as pc
+import reflex as rx
 
 
-class ThedailybitewebappConfig(pc.Config):
+class ThedailybitewebappConfig(rx.Config):
     pass
 
 

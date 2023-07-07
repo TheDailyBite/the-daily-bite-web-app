@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 
-import pynecone as pc
+import reflex as rx
 from news_aggregator_data_access_layer.models.dynamodb import (
     NewsTopics,
     UserTopicSubscriptions,
@@ -35,6 +35,7 @@ class NewsTopicsState(BaseState):
 
     def refresh_user_news_topics(self):
         """Get the news topics."""
+        logger.info(f"Refreshing news topics for user...")
         if self.user and self.user.user_id:
             logger.info(f"Value: {self.is_refreshing_news_topics}")
             self.refreshing_news_topics()
@@ -140,12 +141,12 @@ class NewsTopicsState(BaseState):
                     self.is_updating_user_news_topic_subscriptions = False
                     # TODO - emit metric
                     self.refresh_user_news_topics()
-                    return pc.window_alert(
+                    return rx.window_alert(
                         "Error updating news topic subscriptions. Please try again."
                     )
             self.is_updating_user_news_topic_subscriptions = False
             self.refresh_user_news_topics()
-            return pc.window_alert("News topics subscriptions updated successfully")
+            return rx.window_alert("News topics subscriptions updated successfully")
         else:
             logger.warning(f"User is not logged in. Cannot update news topic subscriptions")
 
@@ -182,12 +183,12 @@ class NewsTopicsState(BaseState):
         # NOTE - this is a temporary workaround to ensure the frontend receives the updated state
         self.news_topics = self.news_topics
 
-    @pc.var
+    @rx.var
     def get_user_subscribed_news_topics(self) -> List[NewsTopic]:
         """Get the user subscribed news topics."""
         return [news_topic for news_topic in self.news_topics if news_topic.is_user_subscribed]
 
-    @pc.var
+    @rx.var
     def get_user_not_subscribed_news_topics(self) -> List[NewsTopic]:
         """Get the user not subscribed news topics."""
         return [news_topic for news_topic in self.news_topics if not news_topic.is_user_subscribed]

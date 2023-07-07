@@ -1,4 +1,4 @@
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.components.logo import logo
@@ -22,17 +22,17 @@ footer_style = {
 
 
 def footer(style=footer_style):
-    return pc.box(
-        pc.vstack(
-            pc.hstack(
-                pc.hstack(
-                    pc.desktop_only(
+    return rx.box(
+        rx.vstack(
+            rx.hstack(
+                rx.hstack(
+                    rx.desktop_only(
                         logo(
                             width=["72px"],
                             height=["72px"],
                         ),
                     ),
-                    pc.text(
+                    rx.text(
                         "Copyright © 2023 The Daily Bite",
                         font_weight="500",
                         justify="space-between",
@@ -40,14 +40,14 @@ def footer(style=footer_style):
                         padding_left="0.5em",
                     ),
                 ),
-                pc.vstack(
-                    pc.text("Resources", color=styles.SUBHEADING_COLOR),
-                    pc.link(
+                rx.vstack(
+                    rx.text("Resources", color=styles.SUBHEADING_COLOR),
+                    rx.link(
                         "Twitter",
                         href=constants.TWITTER_URL,
                         style=footer_item_style,
                     ),
-                    pc.link(
+                    rx.link(
                         "Contact",
                         href=constants.CONTACT_URL,
                         style=footer_item_style,

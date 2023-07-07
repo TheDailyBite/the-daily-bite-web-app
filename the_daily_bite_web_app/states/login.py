@@ -1,4 +1,4 @@
-import pynecone as pc
+import reflex as rx
 from news_aggregator_data_access_layer.models.dynamodb import PreviewUsers
 
 from the_daily_bite_web_app.constants import INDEX_PATH
@@ -24,19 +24,19 @@ class LoginState(BaseState):
                 user = User(user_id=self.user_id_field, name="Michael the Admin")
                 logger.info("Logged in as %s.", user.name)
                 self.user = user
-                return pc.redirect(INDEX_PATH)
+                return rx.redirect(INDEX_PATH)
             try:
                 preview_user = PreviewUsers.get(self.user_id_field)
                 user = User(user_id=preview_user.user_id, name=preview_user.name)
                 logger.info("Logged in as %s.", user.name)
                 self.user = user
-                return pc.redirect(INDEX_PATH)
+                return rx.redirect(INDEX_PATH)
             except PreviewUsers.DoesNotExist:
-                return pc.window_alert(
+                return rx.window_alert(
                     "Wrong user id. Make sure you have been added to the preview of the service."
                 )
             except Exception as e:
-                return pc.window_alert("Error logging in. Please try again.")
-        return pc.window_alert(
+                return rx.window_alert("Error logging in. Please try again.")
+        return rx.window_alert(
             "Wrong user id. Make sure you have been added to the preview of the service."
         )

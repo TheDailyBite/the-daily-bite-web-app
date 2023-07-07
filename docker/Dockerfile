@@ -3,7 +3,7 @@ FROM python:3.9-slim-buster
 RUN adduser --disabled-password pynecone
 
 ENV NODE_VERSION=v20.0.0
-ENV PCCONFIG_DOCKER=pcconfig_docker.py
+ENV RXCONFIG_DOCKER=rxconfig_docker.py
 
 ENV LANG=C.UTF-8 \
   LC_ALL=C.UTF-8 \
@@ -41,13 +41,13 @@ RUN --mount=type=ssh poetry install --no-root --without dev
 
 CMD mkdir -p /app
 COPY --chown=pynecone . /app
-COPY --chown=pynecone $PCCONFIG_DOCKER /app/pcconfig.py
+COPY --chown=pynecone $RXCONFIG_DOCKER /app/rxconfig.py
 USER pynecone
 WORKDIR /app
 ENV BUN_INSTALL="/app/.bun"
-RUN pc init
+RUN reflex init
 
-CMD ["pc","run" , "--env", "prod"]
+CMD ["reflex","run" , "--env", "prod"]
 
 EXPOSE 3000
 EXPOSE 8000
