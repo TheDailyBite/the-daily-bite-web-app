@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import reflex as rx
 
@@ -20,6 +20,8 @@ class NewsTopic(rx.Model):
 class NewsArticle(rx.Model):
     article_id: str
     title: str
+    source_urls: List[str]
+    published_on_dt: str
     full_summary_text: str
     medium_summary_text: str
     short_summary_text: str
