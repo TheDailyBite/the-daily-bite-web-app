@@ -1,10 +1,10 @@
 """The News Topics application state."""
 
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import reflex as rx
 from news_aggregator_data_access_layer.config import SOURCED_ARTICLES_S3_BUCKET
-from news_aggregator_data_access_layer.constants import SummarizationLength
+from news_aggregator_data_access_layer.constants import ArticleApprovalStatus, SummarizationLength
 from news_aggregator_data_access_layer.models.dynamodb import (
     NewsTopics,
     SourcedArticles,
@@ -41,6 +41,8 @@ class NewspaperState(BaseState):
     newspaper_topics: List[NewspaperTopic] = []
     is_refreshing_newspaper_topics: bool = True
     is_refreshing_newspaper: bool = True
+    is_loading_more_articles: bool = False
+    _last_fetched_newspaper_article_by_topic: Dict[str, Dict[str, Dict[str, Any]]] = dict()
 
     def refreshing_newspaper_topics(self) -> None:
         self.is_refreshing_newspaper_topics = True
@@ -124,7 +126,7 @@ class NewspaperState(BaseState):
             NewsArticle(
                 article_id="id1_topic1",
                 title="Title 1",
-                source_urls=["https://www.google.com"],
+                source_urls=["https://www.google.com", "https://www.yahoo.com"],
                 published_on_dt="2021-01-01T18:59:24.365373",
                 full_summary_text="A full summary text. " * 100,
                 medium_summary_text="A medium summary text. " * 50,
@@ -135,6 +137,15 @@ class NewspaperState(BaseState):
                 title="Another title 1",
                 source_urls=["https://www.yahoo.com"],
                 published_on_dt="2021-01-01T18:57:24.365373",
+                full_summary_text="A full summary text 2. " * 100,
+                medium_summary_text="A medium summary text 2. " * 50,
+                short_summary_text="A short summary text. " * 25,
+            ),
+            NewsArticle(
+                article_id="id3_topic1",
+                title="Another title 1.1",
+                source_urls=["https://www.yahoo.com"],
+                published_on_dt="2021-01-01T18:55:24.365373",
                 full_summary_text="A full summary text 2. " * 100,
                 medium_summary_text="A medium summary text 2. " * 50,
                 short_summary_text="A short summary text. " * 25,
@@ -160,7 +171,25 @@ class NewspaperState(BaseState):
                 full_summary_text="A full summary text on topic 2. " * 100,
                 medium_summary_text="A medium summary text on topic 2. " * 50,
                 short_summary_text="A short summary text on topic 2. " * 25,
-            )
+            ),
+            NewsArticle(
+                article_id="id2_topic2",
+                title="Title 2 for this beautiful article",
+                source_urls=["https://www.bing.com"],
+                published_on_dt="2022-03-25T18:59:24.365373",
+                full_summary_text="A full summary text on topic 2. " * 100,
+                medium_summary_text="A medium summary text on topic 2. " * 50,
+                short_summary_text="A short summary text on topic 2. " * 25,
+            ),
+            NewsArticle(
+                article_id="id2_topic2",
+                title="Title 2 for this beautiful article",
+                source_urls=["https://www.bing.com"],
+                published_on_dt="2022-03-25T18:59:24.365373",
+                full_summary_text="A full summary text on topic 2. " * 100,
+                medium_summary_text="A medium summary text on topic 2. " * 50,
+                short_summary_text="A short summary text on topic 2. " * 25,
+            ),
         ]
         return newspaper
 
@@ -188,6 +217,17 @@ class NewspaperState(BaseState):
         # NOTE - this is a temporary workaround to ensure the frontend receives the updated state
         self.newspaper_topics = self.newspaper_topics
 
+    def load_more_articles(self):
+        """Load more articles for the selected newspaper topic."""
+        selected_newspaper_topic = [topic for topic in self.newspaper_topics if topic.is_selected][
+            0
+        ]
+        if selected_newspaper_topic:
+            logger.info(f"Loading more articles for topic: {selected_newspaper_topic.topic}")
+            self.is_loading_more_articles = True
+            self.load_articles_for_topic(selected_newspaper_topic.topic_id, limit=ARTICLES_PER_PAGE)
+            self.is_loading_more_articles = False
+
     @rx.var
     def get_selected_article_summarization_length(self) -> ArticleSummarizationLength:
         """Get the selected article summarization length."""
@@ -200,67 +240,83 @@ class NewspaperState(BaseState):
     def refresh_newspaper_articles(self):
         """
         Populate the newspaper dictionary per subscribed topic.
-        We will load 100 articles per topic to start.
+        We will load a certain amount of articles per topic to start.
         """
         logger.info(f"Refreshing newspaper articles...")
-        newspaper = dict()
+        self.newspaper = dict()
         self.is_refreshing_newspaper = True
         if GENERATE_DUMMY_DATA:
             logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
-            newspaper = self.get_test_newspaper()
+            self.newspaper = self.get_test_newspaper()
         else:
             for newspaper_topic in self.newspaper_topics:
                 logger.info(
                     f"Refreshing newspaper articles for topic id {newspaper_topic.topic_id}..."
                 )
-                articles = dict()
-                sourced_articles = SourcedArticles.query(newspaper_topic.topic_id, reverse=True)
-                while len(newspaper[newspaper_topic.topic_id]) < ARTICLES_PER_PAGE:
-                    for sourced_article in sourced_articles:
-                        if len(newspaper[newspaper_topic.topic_id]) < ARTICLES_PER_PAGE:
-                            date_published = sourced_article.date_published
-                            if date_published not in articles:
-                                articles[date_published] = []
-                            articles[date_published].append(
-                                NewsArticle(
-                                    article_id=sourced_article.sourced_article_id,
-                                    title=sourced_article.title,
-                                    source_urls=sourced_article.source_article_urls,
-                                    published_on_dt=sourced_article.dt_published.isoformat(),
-                                    full_summary_text=get_object(
-                                        SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
-                                    )[0],
-                                    medium_summary_text=get_object(
-                                        SOURCED_ARTICLES_S3_BUCKET,
-                                        sourced_article.medium_summary_ref,
-                                    )[0],
-                                    short_summary_text=get_object(
-                                        SOURCED_ARTICLES_S3_BUCKET,
-                                        sourced_article.short_summary_ref,
-                                    )[0],
-                                )
-                            )
-                        else:
-                            break
-                newspaper[newspaper_topic.topic_id] = articles
-        self.newspaper = newspaper
+                self.load_articles_for_topic(newspaper_topic.topic_id, limit=ARTICLES_PER_PAGE)
         self.is_refreshing_newspaper = False
 
-    @rx.var
-    def get_topic_newspaper_articles(self) -> List[List[Union[str, List[NewsArticle]]]]:
-        """Get the newspaper articles for the selected topic sorted by publishing date (latest first)."""
-        selected_newspaper_topic = [
-            newspaper_topic
-            for newspaper_topic in self.newspaper_topics
-            if newspaper_topic.is_selected
-        ]
-        if not selected_newspaper_topic:
-            return []
-        newspaper_articles = []
-        articles_by_date = self.newspaper[selected_newspaper_topic[0].topic_id]
-        for published_date, articles in articles_by_date.items():
-            newspaper_articles.append([published_date, articles])
-        return sorted(newspaper_articles, key=lambda x: x[0], reverse=True)
+    def load_articles_for_topic(self, topic_id: str, limit: int) -> None:
+        """Load articles for the given topic id."""
+        logger.info(f"Loading articles for topic id {topic_id}...")
+        articles = dict()
+        sourced_articles = SourcedArticles.query(
+            topic_id,
+            limit=limit,
+            scan_index_forward=False,
+            filter_condition=SourcedArticles.article_approval_status
+            == ArticleApprovalStatus.APPROVED,
+            last_evaluated_key=self._last_fetched_newspaper_article_by_topic.get(topic_id),
+        )
+        for sourced_article in sourced_articles:
+            date_published = sourced_article.date_published
+            if date_published not in articles:
+                articles[date_published] = []
+            logger.info(
+                f"Loading article {sourced_article.sourced_article_id}. Full summary ref {sourced_article.full_summary_ref}..."
+            )
+            articles[date_published].append(
+                NewsArticle(
+                    article_id=sourced_article.sourced_article_id,
+                    title=sourced_article.title,
+                    source_urls=sourced_article.source_article_urls,
+                    published_on_dt=sourced_article.dt_published.isoformat(),
+                    full_summary_text=get_object(
+                        SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
+                    )[0],
+                    medium_summary_text=get_object(
+                        SOURCED_ARTICLES_S3_BUCKET,
+                        sourced_article.medium_summary_ref,
+                    )[0],
+                    short_summary_text=get_object(
+                        SOURCED_ARTICLES_S3_BUCKET,
+                        sourced_article.short_summary_ref,
+                    )[0],
+                )
+            )
+        if topic_id not in self.newspaper:
+            self.newspaper[topic_id] = articles
+        else:
+            self.newspaper[topic_id] = {**self.newspaper[topic_id], **articles}
+        self._last_fetched_newspaper_article_by_topic[
+            topic_id
+        ] = sourced_articles.last_evaluated_key
+
+    # @rx.var
+    # def get_topic_newspaper_articles(self) -> List[List[Union[str, List[NewsArticle]]]]:
+    #     """Get the newspaper articles for the selected topic sorted by publishing date (latest first)."""
+    #     selected_newspaper_topic = [
+    #         newspaper_topic
+    #         for newspaper_topic in self.newspaper_topics
+    #         if newspaper_topic.is_selected
+    #     ]
+    #     if not selected_newspaper_topic:
+    #         return []
+    #     newspaper_articles = []
+    #     articles_by_date = self.newspaper[selected_newspaper_topic[0].topic_id]
+    #     for published_date, articles in articles_by_date.items():
+    #         newspaper_articles.append([published_date, articles])
+    #     return sorted(newspaper_articles, key=lambda x: x[0], reverse=True)
 
     @rx.var
     def get_topic_newspaper_articles_no_date(self) -> List[List[NewsArticle]]:
@@ -272,8 +328,11 @@ class NewspaperState(BaseState):
         ]
         if not selected_newspaper_topic:
             return []
+        selected_newspaper_topic_id = selected_newspaper_topic[0].topic_id
         newspaper_articles = []
-        articles_by_date = self.newspaper[selected_newspaper_topic[0].topic_id]
+        if selected_newspaper_topic_id not in self.newspaper:
+            return []
+        articles_by_date = self.newspaper[selected_newspaper_topic_id]
         for published_date, articles in articles_by_date.items():
             newspaper_articles.append([published_date, articles])
         sorted_newspaper_articles = sorted(newspaper_articles, key=lambda x: x[0], reverse=True)
@@ -289,8 +348,11 @@ class NewspaperState(BaseState):
         ]
         if not selected_newspaper_topic:
             return []
+        selected_newspaper_topic_id = selected_newspaper_topic[0].topic_id
         newspaper_published_dates = []
-        articles_by_date = self.newspaper[selected_newspaper_topic[0].topic_id]
+        if selected_newspaper_topic_id not in self.newspaper:
+            return []
+        articles_by_date = self.newspaper[selected_newspaper_topic_id]
         for published_date, _ in articles_by_date.items():
             newspaper_published_dates.append(published_date)
         return [
