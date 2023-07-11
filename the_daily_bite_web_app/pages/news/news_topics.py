@@ -27,8 +27,6 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
         rx.vstack(
             rx.text(news_topic.topic),
             rx.box(
-                rx.text(news_topic.category),
-                rx.text(" · ", margin_x="0.3rem"),
                 rx.text("last publishing date: " + news_topic.last_publishing_date),
                 display="flex",
                 font_size="0.8rem",

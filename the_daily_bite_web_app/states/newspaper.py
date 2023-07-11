@@ -76,7 +76,6 @@ class NewspaperState(BaseState):
                         {
                             "topic_id": news_topic.topic_id,
                             "topic": news_topic.topic,
-                            "category": news_topic.category,
                             "is_selected": True if idx == 0 else False,
                         }
                         for idx, news_topic in enumerate(news_topics)
@@ -99,19 +98,16 @@ class NewspaperState(BaseState):
             NewspaperTopic(
                 topic_id="1",
                 topic="Topic 1",
-                category="Category 1",
                 is_selected=True,
             ),
             NewspaperTopic(
                 topic_id="2",
                 topic="Topic 2",
-                category="Category 2",
                 is_selected=False,
             ),
             NewspaperTopic(
                 topic_id="3",
                 topic="Topic 3",
-                category="Category 3",
                 is_selected=False,
             ),
         ]
@@ -206,6 +202,10 @@ class NewspaperState(BaseState):
     @rx.var
     def get_newspaper_topics(self) -> List[NewspaperTopic]:
         return [topic for topic in self.newspaper_topics]
+
+    @rx.var
+    def has_subscribed_newspaper_topics(self) -> bool:
+        return len(self.newspaper_topics) > 0
 
     def newspaper_topic_selected(self, idx: int):
         """Set the selected newspaper topic."""

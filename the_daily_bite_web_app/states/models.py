@@ -11,7 +11,6 @@ class User(rx.Model):
 class NewsTopic(rx.Model):
     topic_id: str
     topic: str
-    category: Optional[str]
     last_publishing_date: Optional[str]
     is_user_subscribed: bool
     is_selected: bool = False
@@ -35,5 +34,4 @@ class ArticleSummarizationLength(rx.Model):
 class NewspaperTopic(rx.Model):
     topic_id: str
     topic: str
-    category: Optional[str]
     is_selected: bool

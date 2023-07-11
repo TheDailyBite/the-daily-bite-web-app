@@ -4,7 +4,7 @@ import reflex as rx
 from news_aggregator_data_access_layer.constants import SummarizationLength
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.constants import NEWSPAPER_PATH
+from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH, NEWSPAPER_PATH
 from the_daily_bite_web_app.states.models import (
     ArticleSummarizationLength,
     NewsArticle,
@@ -138,7 +138,9 @@ def topic_newspaper():
 def newspaper() -> rx.Component:
     """Get the news topics page."""
     return rx.hstack(
-        topic_newspaper(),
+        rx.cond(
+            NewspaperState.has_subscribed_newspaper_topics, topic_newspaper(), rx.box(width="100%")
+        ),
         rx.vstack(
             rx.box(
                 rx.text(
@@ -184,10 +186,21 @@ def newspaper() -> rx.Component:
                     NewspaperState.is_refreshing_newspaper_topics,
                     rx.center(rx.circular_progress(is_indeterminate=True, size="100px")),
                     rx.vstack(
-                        rx.foreach(
-                            NewspaperState.get_newspaper_topics,
-                            lambda newspaper_topic, idx: to_ui_newspaper_topic_button(
-                                newspaper_topic, idx
+                        rx.cond(
+                            NewspaperState.has_subscribed_newspaper_topics,
+                            rx.foreach(
+                                NewspaperState.get_newspaper_topics,
+                                lambda newspaper_topic, idx: to_ui_newspaper_topic_button(
+                                    newspaper_topic, idx
+                                ),
+                            ),
+                            rx.box(
+                                rx.text("You haven't subscribed to any news topics."),
+                                rx.link(
+                                    rx.button("Subscribe to News Topics here!"),
+                                    href=NEWS_TOPICS_PATH,
+                                ),
+                                width="90%",
                             ),
                         ),
                         spacing="1rem",

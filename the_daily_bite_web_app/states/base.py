@@ -30,3 +30,8 @@ class BaseState(rx.State):
     def logged_in(self):
         """Check if a user is logged in."""
         return self.user is not None
+
+    @rx.var
+    def user_name(self):
+        """Get the user name."""
+        return self.user.name if self.user else ""

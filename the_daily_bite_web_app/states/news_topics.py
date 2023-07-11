@@ -62,7 +62,6 @@ class NewsTopicsState(BaseState):
                         {
                             "topic_id": news_topic.topic_id,
                             "topic": news_topic.topic,
-                            "category": news_topic.category,
                             "last_publishing_date": news_topic.last_publishing_date.isoformat()
                             if news_topic.last_publishing_date
                             else "",
@@ -156,21 +155,18 @@ class NewsTopicsState(BaseState):
             NewsTopic(
                 topic_id="1",
                 topic="Topic 1",
-                category="Category 1",
                 last_publishing_date="2021-01-01",
                 is_user_subscribed=True,
             ),
             NewsTopic(
                 topic_id="2",
                 topic="Topic 2",
-                category="Category 2",
                 last_publishing_date="2021-01-02",
                 is_user_subscribed=False,
             ),
             NewsTopic(
                 topic_id="3",
                 topic="Topic 3",
-                category="Category 3",
                 last_publishing_date="2021-01-03",
                 is_user_subscribed=True,
             ),

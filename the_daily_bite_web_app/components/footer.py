@@ -3,6 +3,7 @@ import reflex as rx
 from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.pages.index import index
+from the_daily_bite_web_app.states import BaseState
 
 footer_item_style = {
     "font_family": "Inter",
@@ -23,28 +24,37 @@ footer_style = {
 
 def footer(style=footer_style):
     return rx.box(
-        rx.vstack(
-            rx.hstack(
+        rx.hstack(
+            rx.vstack(
                 rx.hstack(
-                    rx.desktop_only(
-                        logo(
-                            width=["72px"],
-                            height=["72px"],
-                        ),
+                    logo(
+                        width=["72px"],
+                        height=["72px"],
                     ),
                     rx.text(
                         "Copyright © 2023 The Daily Bite",
                         font_weight="500",
-                        justify="space-between",
                         color=styles.LIGHT_TEXT_COLOR,
                         padding_left="0.5em",
                     ),
+                    align_items="center",
+                    margin_bottom="0.5em",
+                ),
+                align_items="start",
+            ),
+            rx.hstack(
+                rx.vstack(
+                    rx.text("Welcome to The Daily Bite,", color=styles.SUBHEADING_COLOR),
+                    rx.text(BaseState.user_name, color=styles.SUBHEADING_COLOR),
+                    rx.cond(BaseState.logged_in, rx.link("Log Out", on_click=BaseState.log_out)),
+                    align_items="start",
+                    margin_right="2em",
                 ),
                 rx.vstack(
                     rx.text("Resources", color=styles.SUBHEADING_COLOR),
                     rx.link(
-                        "Twitter",
-                        href=constants.TWITTER_URL,
+                        "Threads",
+                        href=constants.THREADS_URL,
                         style=footer_item_style,
                     ),
                     rx.link(
@@ -54,12 +64,11 @@ def footer(style=footer_style):
                     ),
                     align_items="start",
                 ),
-                justify="space-between",
-                color=styles.LIGHT_TEXT_COLOR,
-                align_items="top",
-                min_width="100%",
-                position="sticky",
+                align_items="start",
             ),
+            justify_content="space-between",
+            align_items="start",
         ),
+        color=styles.LIGHT_TEXT_COLOR,
         **style,
     )

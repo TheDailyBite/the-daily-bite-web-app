@@ -44,7 +44,7 @@ def c2a():
             rx.button(
                 rx.link(
                     rx.box(
-                        "Read the News Daily",
+                        "Suggest a new news topic!",
                         rx.icon(
                             tag="star",
                             color="#eec600",
@@ -54,7 +54,7 @@ def c2a():
                         width="100%",
                         height="100%",
                     ),
-                    href=constants.TWITTER_URL,
+                    href=constants.THREADS_URL,
                     _hover={},
                 ),
                 bg=styles.ACCENT_COLOR,
@@ -90,10 +90,10 @@ def index() -> rx.Component:
     """Get the main The Daily Bite landing page."""
     return rx.box(
         landing(),
-        rx.cond(
-            IndexState.show_c2a,
-            c2a(),
-        ),
+        # rx.cond(
+        #     IndexState.show_c2a,
+        #     c2a(),
+        # ),
         # background_image="/grid.png",
         # background_repeat="no-repeat",
         # background_position="top",
