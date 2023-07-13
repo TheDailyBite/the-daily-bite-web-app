@@ -92,9 +92,7 @@ def news_topics() -> rx.Component:
                     border_radius="30px",
                     background="linear-gradient(90deg, #756AEE 0%, #EE756A 100%)",
                     on_click=[
-                        NewsTopicsState.updating_news_topic_subscriptions,
                         NewsTopicsState.update_user_news_topic_subscriptions,
-                        NewsTopicsState.refreshing_news_topics,
                         NewsTopicsState.refresh_user_news_topics,
                     ],
                 ),

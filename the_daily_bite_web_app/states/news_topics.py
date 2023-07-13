@@ -2,6 +2,8 @@
 
 from typing import List, Optional
 
+import asyncio
+
 import reflex as rx
 from news_aggregator_data_access_layer.models.dynamodb import (
     NewsTopics,
@@ -26,13 +28,7 @@ class NewsTopicsState(BaseState):
     is_refreshing_news_topics: bool = True
     is_updating_user_news_topic_subscriptions: bool = False
 
-    def refreshing_news_topics(self):
-        self.is_refreshing_news_topics = True
-
-    def updating_news_topic_subscriptions(self):
-        self.is_updating_user_news_topic_subscriptions = True
-
-    def refresh_user_news_topics(self):
+    async def refresh_user_news_topics(self):
         """Get the news topics."""
         logger.info(f"Refreshing news topics for user...")
         if self.user and self.user.user_id:
@@ -40,10 +36,10 @@ class NewsTopicsState(BaseState):
             logger.info(
                 f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_news_topics}..."
             )
+            self.set_is_refreshing_news_topics(True)
+            yield
             # TODO - to test circular progress
-            import time
-
-            time.sleep(5)
+            await asyncio.sleep(2)
             # TODO - can remove this
             if GENERATE_DUMMY_DATA:
                 logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
@@ -73,21 +69,23 @@ class NewsTopicsState(BaseState):
                     logger.error(f"Error getting news topics: {e}", exc_info=True)
                     # TODO - emit metric
                     self.news_topics = []
-            self.is_refreshing_news_topics = False
+            self.set_is_refreshing_news_topics(False)
+            yield
         else:
             logger.warning(f"User is not logged in. Cannot get news topics")
 
-    def update_user_news_topic_subscriptions(self):
+    async def update_user_news_topic_subscriptions(self):
         """Update the user news topic subscriptions."""
         if self.user and self.user.user_id:
+            self.set_is_updating_user_news_topic_subscriptions(True)
+            yield
             # TODO - can remove this
             if GENERATE_DUMMY_DATA:
                 logger.info(
-                    f"GENERATE_DUMMY_DATA is set. Fake update user news topic subscriptions"
+                    f"GENERATE_DUMMY_DATA is set. Fake update user news topic subscriptions. Is Updating {self.is_updating_user_news_topic_subscriptions}"
                 )
-                import time
-
-                time.sleep(2)
+                await asyncio.sleep(2)
+                yield rx.window_alert("News topics subscriptions updated successfully")
             else:
                 news_topics_to_unsubscribe = [
                     news_topic.topic_id
@@ -100,7 +98,7 @@ class NewsTopicsState(BaseState):
                     if not news_topic.is_user_subscribed and news_topic.is_selected
                 ]
                 if not news_topics_to_unsubscribe and not news_topics_to_subscribe:
-                    return
+                    yield
                 try:
                     for topic_id in news_topics_to_unsubscribe:
                         logger.info(
@@ -132,15 +130,15 @@ class NewsTopicsState(BaseState):
                             )
                             # TODO - emit metric
                             continue
+                    yield rx.window_alert("News topics subscriptions updated successfully")
                 except Exception as e:
                     logger.error(f"Error updating news topic subscriptions: {e}", exc_info=True)
-                    self.is_updating_user_news_topic_subscriptions = False
                     # TODO - emit metric
-                    return rx.window_alert(
+                    yield rx.window_alert(
                         "Error updating news topic subscriptions. Please try again."
                     )
-            self.is_updating_user_news_topic_subscriptions = False
-            return rx.window_alert("News topics subscriptions updated successfully")
+            self.set_is_updating_user_news_topic_subscriptions(False)
+            yield
         else:
             logger.warning(f"User is not logged in. Cannot update news topic subscriptions")
 
@@ -187,4 +185,4 @@ class NewsTopicsState(BaseState):
     def on_load(self):
         """Load the news topics."""
         logger.info("Loading news topics...")
-        self.refresh_user_news_topics()
+        yield NewsTopicsState.refresh_user_news_topics()

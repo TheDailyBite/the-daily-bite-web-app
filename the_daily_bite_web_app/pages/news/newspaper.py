@@ -130,7 +130,6 @@ def topic_newspaper():
                     rx.button(
                         "Load More Articles",
                         on_click=[
-                            NewspaperState.articles_loading,
                             NewspaperState.load_more_articles,
                         ],
                     ),

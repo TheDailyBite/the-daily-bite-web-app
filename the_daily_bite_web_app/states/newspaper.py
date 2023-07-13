@@ -46,31 +46,18 @@ class NewspaperState(BaseState):
     is_loading_more_articles: bool = False
     _last_fetched_newspaper_article_by_topic: Dict[str, Dict[str, Dict[str, Any]]] = dict()
 
-    # @rx.var
-    # def is_refreshing_newspaper_var(self) -> bool:
-    #     """Return the value of is_refreshing"""
-    #     logger.info(f"Getting value of is_refreshing_newspaper: {self.is_refreshing_newspaper}")
-    #     return self.is_refreshing_newspaper
-
-    # @rx.var
-    # def is_loading_more_articles_var(self) -> bool:
-    #     """Return the value of is_loading_more_articles"""
-    #     logger.info(f"Getting value of is_loading_more_articles: {self.is_loading_more_articles}")
-    #     return self.is_loading_more_articles
-
-    def refresh_user_subscribed_newspaper_topics(self):
+    async def refresh_user_subscribed_newspaper_topics(self):
         # """Get the news topics."""
         logger.info(f"Refreshing subscribed newspaper topics for user...")
         if self.user and self.user.user_id:
             logger.info(f"User Name: {self.user.name};")
-            self.is_refreshing_newspaper_topics = True
+            self.set_is_refreshing_newspaper_topics(True)
+            yield
             logger.info(
                 f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_newspaper_topics}..."
             )
             # TODO - to test circular progress
-            import time
-
-            time.sleep(2)
+            await asyncio.sleep(2)
             # TODO - can remove this
             if GENERATE_DUMMY_DATA:
                 logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
@@ -87,7 +74,7 @@ class NewspaperState(BaseState):
                         {
                             "topic_id": news_topic.topic_id,
                             "topic": news_topic.topic,
-                            "is_selected": True if idx == 0 else False,
+                            "is_selected": False,
                         }
                         for idx, news_topic in enumerate(news_topics)
                         if news_topic.is_published
@@ -99,7 +86,8 @@ class NewspaperState(BaseState):
                     logger.error(f"Error getting news topics: {e}", exc_info=True)
                     # TODO - emit metric
                     self.newspaper_topics = []
-            self.is_refreshing_newspaper_topics = False
+            self.set_is_refreshing_newspaper_topics(False)
+            yield
         else:
             logger.warning(f"User is not logged in. Cannot get news topics")
 
@@ -228,26 +216,24 @@ class NewspaperState(BaseState):
         # NOTE - this is a temporary workaround to ensure the frontend receives the updated state
         self.newspaper_topics = self.newspaper_topics
 
-    def articles_loading(self):
-        self.is_loading_more_articles = True
-
     async def load_more_articles(self):
         """Load more articles for the selected newspaper topic."""
         selected_newspaper_topic = [topic for topic in self.newspaper_topics if topic.is_selected][
             0
         ]
         if selected_newspaper_topic:
+            self.set_is_loading_more_articles(True)
+            yield
             logger.info(f"Loading more articles for topic: {selected_newspaper_topic.topic}")
             if not GENERATE_DUMMY_DATA:
                 self.load_articles_for_topic(
                     selected_newspaper_topic.topic_id, count=ARTICLES_PER_PAGE
                 )
             else:
-                logger.info(
-                    f"Sleeping for 5 seconds to simulate loading more articles... Vals: {self.is_loading_more_articles}; {self.is_refreshing_newspaper}"
-                )
+                logger.info(f"Sleeping for 5 seconds to simulate loading more articles...")
                 await asyncio.sleep(5)
-            self.is_loading_more_articles = False
+            self.set_is_loading_more_articles(False)
+            yield
 
     @rx.var
     def get_selected_article_summarization_length(self) -> ArticleSummarizationLength:
@@ -258,14 +244,15 @@ class NewspaperState(BaseState):
                 selected_article_summarization_length = article_summarization_length
                 return selected_article_summarization_length
 
-    def refresh_newspaper_articles(self):
+    async def refresh_newspaper_articles(self):
         """
         Populate the newspaper dictionary per subscribed topic.
         We will load a certain amount of articles per topic to start.
         """
         logger.info(f"Refreshing newspaper articles...")
         self.newspaper = dict()
-        self.is_refreshing_newspaper = True
+        self.set_is_refreshing_newspaper(True)
+        yield
         if GENERATE_DUMMY_DATA:
             logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
             self.newspaper = self.get_test_newspaper()
@@ -275,9 +262,10 @@ class NewspaperState(BaseState):
                     f"Refreshing newspaper articles for topic id {newspaper_topic.topic_id}..."
                 )
                 self.load_articles_for_topic(newspaper_topic.topic_id, count=ARTICLES_PER_PAGE)
-        self.is_refreshing_newspaper = False
+        self.set_is_refreshing_newspaper(False)
+        yield
 
-    def load_articles_for_topic(self, topic_id: str, count: int) -> None:
+    def load_articles_for_topic(self, topic_id: str, count: int):
         """Load articles for the given topic id."""
         logger.info(f"Loading articles for topic id {topic_id}...")
         articles = dict()
@@ -326,22 +314,6 @@ class NewspaperState(BaseState):
         # we are fetching new article from the "future" and from the past we have yet fetched
         self._last_fetched_newspaper_article_by_topic[topic_id] = last_evaluated_key
 
-    # @rx.var
-    # def get_topic_newspaper_articles(self) -> List[List[Union[str, List[NewsArticle]]]]:
-    #     """Get the newspaper articles for the selected topic sorted by publishing date (latest first)."""
-    #     selected_newspaper_topic = [
-    #         newspaper_topic
-    #         for newspaper_topic in self.newspaper_topics
-    #         if newspaper_topic.is_selected
-    #     ]
-    #     if not selected_newspaper_topic:
-    #         return []
-    #     newspaper_articles = []
-    #     articles_by_date = self.newspaper[selected_newspaper_topic[0].topic_id]
-    #     for published_date, articles in articles_by_date.items():
-    #         newspaper_articles.append([published_date, articles])
-    #     return sorted(newspaper_articles, key=lambda x: x[0], reverse=True)
-
     @rx.var
     def get_topic_newspaper_articles_no_date(self) -> List[List[NewsArticle]]:
         """Get the newspaper articles for the selected topic sorted by publishing date (latest first)."""
@@ -387,5 +359,5 @@ class NewspaperState(BaseState):
     def on_load_newspaper(self):
         """Load the news topics."""
         logger.info(f"Loading newspaper state...")
-        self.refresh_user_subscribed_newspaper_topics()
-        self.refresh_newspaper_articles()
+        yield NewspaperState.refresh_user_subscribed_newspaper_topics()
+        yield NewspaperState.refresh_newspaper_articles()
