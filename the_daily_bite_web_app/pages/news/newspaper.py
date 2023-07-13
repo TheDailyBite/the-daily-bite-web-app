@@ -22,7 +22,7 @@ def to_ui_article_lengths_button(
     return rx.button(
         article_summarization_length.summarization_length,
         background_color=rx.cond(
-            article_summarization_length.is_selected,
+            article_summarization_length.is_selected == True,
             selected_background_color,
             not_selected_background_color,
         ),
@@ -40,7 +40,9 @@ def to_ui_newspaper_topic_button(newspaper_topic: NewspaperTopic, idx: int):
     return rx.button(
         newspaper_topic.topic,
         background_color=rx.cond(
-            newspaper_topic.is_selected, selected_background_color, not_selected_background_color
+            newspaper_topic.is_selected == True,
+            selected_background_color,
+            not_selected_background_color,
         ),
         padding="1rem",
         border="1px solid #ddd",
@@ -90,11 +92,14 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
             border_radius="md",
         ),
         rx.hstack(
-            rx.box(
+            rx.hstack(
                 rx.foreach(
                     newspaper_article.source_urls,
-                    lambda source_url, idx: rx.link("[" + idx + "] ", href=source_url),
+                    lambda source_url, idx: rx.link(
+                        "[" + idx + "]", href=source_url, is_external=True
+                    ),
                 ),
+                spacing="0.25em",
             ),
             rx.text("Published at: " + published_dt),
             justify_content="space-between",
@@ -110,7 +115,7 @@ def topic_newspaper():
     return rx.box(
         rx.vstack(
             rx.cond(
-                NewspaperState.is_refreshing_newspaper,
+                NewspaperState.is_refreshing_newspaper == True,
                 rx.circular_progress(is_indeterminate=True, size="100px"),
                 rx.foreach(
                     NewspaperState.get_topic_newspaper_articles_published_dates,
@@ -118,11 +123,17 @@ def topic_newspaper():
                 ),
             ),
             rx.cond(
-                not NewspaperState.is_refreshing_newspaper,
+                NewspaperState.is_refreshing_newspaper == False,
                 rx.cond(
-                    NewspaperState.is_loading_more_articles,
+                    NewspaperState.is_loading_more_articles == True,
                     rx.circular_progress(is_indeterminate=True, size="100px"),
-                    rx.button("Load More Articles", on_click=NewspaperState.load_more_articles),
+                    rx.button(
+                        "Load More Articles",
+                        on_click=[
+                            NewspaperState.articles_loading,
+                            NewspaperState.load_more_articles,
+                        ],
+                    ),
                 ),
             ),
         ),
@@ -139,7 +150,9 @@ def newspaper() -> rx.Component:
     """Get the news topics page."""
     return rx.hstack(
         rx.cond(
-            NewspaperState.has_subscribed_newspaper_topics, topic_newspaper(), rx.box(width="100%")
+            NewspaperState.has_subscribed_newspaper_topics == True,
+            topic_newspaper(),
+            rx.box(width="100%"),
         ),
         rx.vstack(
             rx.box(
@@ -183,11 +196,11 @@ def newspaper() -> rx.Component:
                 ),
                 rx.divider(),
                 rx.cond(
-                    NewspaperState.is_refreshing_newspaper_topics,
+                    NewspaperState.is_refreshing_newspaper_topics == True,
                     rx.center(rx.circular_progress(is_indeterminate=True, size="100px")),
                     rx.vstack(
                         rx.cond(
-                            NewspaperState.has_subscribed_newspaper_topics,
+                            NewspaperState.has_subscribed_newspaper_topics == True,
                             rx.foreach(
                                 NewspaperState.get_newspaper_topics,
                                 lambda newspaper_topic, idx: to_ui_newspaper_topic_button(
@@ -195,12 +208,14 @@ def newspaper() -> rx.Component:
                                 ),
                             ),
                             rx.box(
-                                rx.text("You haven't subscribed to any news topics."),
+                                rx.text(
+                                    "You haven't subscribed to any news topics.",
+                                    text_align="center",
+                                ),
                                 rx.link(
                                     rx.button("Subscribe to News Topics here!"),
                                     href=NEWS_TOPICS_PATH,
                                 ),
-                                width="90%",
                             ),
                         ),
                         spacing="1rem",

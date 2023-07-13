@@ -2,6 +2,8 @@
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import asyncio
+
 import reflex as rx
 from news_aggregator_data_access_layer.config import SOURCED_ARTICLES_S3_BUCKET
 from news_aggregator_data_access_layer.constants import ArticleApprovalStatus, SummarizationLength
@@ -44,15 +46,24 @@ class NewspaperState(BaseState):
     is_loading_more_articles: bool = False
     _last_fetched_newspaper_article_by_topic: Dict[str, Dict[str, Dict[str, Any]]] = dict()
 
-    def refreshing_newspaper_topics(self) -> None:
-        self.is_refreshing_newspaper_topics = True
+    # @rx.var
+    # def is_refreshing_newspaper_var(self) -> bool:
+    #     """Return the value of is_refreshing"""
+    #     logger.info(f"Getting value of is_refreshing_newspaper: {self.is_refreshing_newspaper}")
+    #     return self.is_refreshing_newspaper
+
+    # @rx.var
+    # def is_loading_more_articles_var(self) -> bool:
+    #     """Return the value of is_loading_more_articles"""
+    #     logger.info(f"Getting value of is_loading_more_articles: {self.is_loading_more_articles}")
+    #     return self.is_loading_more_articles
 
     def refresh_user_subscribed_newspaper_topics(self):
         # """Get the news topics."""
         logger.info(f"Refreshing subscribed newspaper topics for user...")
         if self.user and self.user.user_id:
             logger.info(f"User Name: {self.user.name};")
-            self.refreshing_newspaper_topics()
+            self.is_refreshing_newspaper_topics = True
             logger.info(
                 f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_newspaper_topics}..."
             )
@@ -217,15 +228,25 @@ class NewspaperState(BaseState):
         # NOTE - this is a temporary workaround to ensure the frontend receives the updated state
         self.newspaper_topics = self.newspaper_topics
 
-    def load_more_articles(self):
+    def articles_loading(self):
+        self.is_loading_more_articles = True
+
+    async def load_more_articles(self):
         """Load more articles for the selected newspaper topic."""
         selected_newspaper_topic = [topic for topic in self.newspaper_topics if topic.is_selected][
             0
         ]
         if selected_newspaper_topic:
             logger.info(f"Loading more articles for topic: {selected_newspaper_topic.topic}")
-            self.is_loading_more_articles = True
-            self.load_articles_for_topic(selected_newspaper_topic.topic_id, limit=ARTICLES_PER_PAGE)
+            if not GENERATE_DUMMY_DATA:
+                self.load_articles_for_topic(
+                    selected_newspaper_topic.topic_id, count=ARTICLES_PER_PAGE
+                )
+            else:
+                logger.info(
+                    f"Sleeping for 5 seconds to simulate loading more articles... Vals: {self.is_loading_more_articles}; {self.is_refreshing_newspaper}"
+                )
+                await asyncio.sleep(5)
             self.is_loading_more_articles = False
 
     @rx.var
@@ -253,16 +274,16 @@ class NewspaperState(BaseState):
                 logger.info(
                     f"Refreshing newspaper articles for topic id {newspaper_topic.topic_id}..."
                 )
-                self.load_articles_for_topic(newspaper_topic.topic_id, limit=ARTICLES_PER_PAGE)
+                self.load_articles_for_topic(newspaper_topic.topic_id, count=ARTICLES_PER_PAGE)
         self.is_refreshing_newspaper = False
 
-    def load_articles_for_topic(self, topic_id: str, limit: int) -> None:
+    def load_articles_for_topic(self, topic_id: str, count: int) -> None:
         """Load articles for the given topic id."""
         logger.info(f"Loading articles for topic id {topic_id}...")
         articles = dict()
         sourced_articles = SourcedArticles.query(
             topic_id,
-            limit=limit,
+            limit=count,
             scan_index_forward=False,
             filter_condition=SourcedArticles.article_approval_status
             == ArticleApprovalStatus.APPROVED,
@@ -272,9 +293,7 @@ class NewspaperState(BaseState):
             date_published = sourced_article.date_published
             if date_published not in articles:
                 articles[date_published] = []
-            logger.info(
-                f"Loading article {sourced_article.sourced_article_id}. Full summary ref {sourced_article.full_summary_ref}..."
-            )
+            logger.info(f"Loading article {sourced_article.sourced_article_id}...")
             articles[date_published].append(
                 NewsArticle(
                     article_id=sourced_article.sourced_article_id,
@@ -297,10 +316,15 @@ class NewspaperState(BaseState):
         if topic_id not in self.newspaper:
             self.newspaper[topic_id] = articles
         else:
-            self.newspaper[topic_id] = {**self.newspaper[topic_id], **articles}
-        self._last_fetched_newspaper_article_by_topic[
-            topic_id
-        ] = sourced_articles.last_evaluated_key
+            for date_published, articles_on_date in articles.items():
+                if date_published not in self.newspaper[topic_id]:
+                    self.newspaper[topic_id][date_published] = []
+                self.newspaper[topic_id][date_published].extend(articles_on_date)
+        last_evaluated_key = sourced_articles.last_evaluated_key
+        logger.info(f"Topic Id: {topic_id}; Last Evaluated Key: {last_evaluated_key}")
+        # TODO - think of this better
+        # we are fetching new article from the "future" and from the past we have yet fetched
+        self._last_fetched_newspaper_article_by_topic[topic_id] = last_evaluated_key
 
     # @rx.var
     # def get_topic_newspaper_articles(self) -> List[List[Union[str, List[NewsArticle]]]]:

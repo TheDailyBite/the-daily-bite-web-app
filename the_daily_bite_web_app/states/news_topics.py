@@ -23,7 +23,6 @@ class NewsTopicsState(BaseState):
     """The news topics state."""
 
     news_topics: List[NewsTopic] = []
-    is_loaded: bool = False
     is_refreshing_news_topics: bool = True
     is_updating_user_news_topic_subscriptions: bool = False
 
@@ -38,7 +37,6 @@ class NewsTopicsState(BaseState):
         logger.info(f"Refreshing news topics for user...")
         if self.user and self.user.user_id:
             logger.info(f"Value: {self.is_refreshing_news_topics}")
-            self.refreshing_news_topics()
             logger.info(
                 f"Refreshing news topics for user {self.user.user_id}. Value: {self.is_refreshing_news_topics}..."
             )
@@ -82,7 +80,6 @@ class NewsTopicsState(BaseState):
     def update_user_news_topic_subscriptions(self):
         """Update the user news topic subscriptions."""
         if self.user and self.user.user_id:
-            self.updating_news_topic_subscriptions()
             # TODO - can remove this
             if GENERATE_DUMMY_DATA:
                 logger.info(
@@ -139,12 +136,10 @@ class NewsTopicsState(BaseState):
                     logger.error(f"Error updating news topic subscriptions: {e}", exc_info=True)
                     self.is_updating_user_news_topic_subscriptions = False
                     # TODO - emit metric
-                    self.refresh_user_news_topics()
                     return rx.window_alert(
                         "Error updating news topic subscriptions. Please try again."
                     )
             self.is_updating_user_news_topic_subscriptions = False
-            self.refresh_user_news_topics()
             return rx.window_alert("News topics subscriptions updated successfully")
         else:
             logger.warning(f"User is not logged in. Cannot update news topic subscriptions")
@@ -193,8 +188,3 @@ class NewsTopicsState(BaseState):
         """Load the news topics."""
         logger.info("Loading news topics...")
         self.refresh_user_news_topics()
-        if self.is_loaded is False:
-            pass
-            # self.refresh_user_news_topics()
-        #     self.refresh_user_news_topics()
-        #     self.is_loaded = True

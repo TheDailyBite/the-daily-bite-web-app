@@ -12,14 +12,14 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
     not_selected_background_color = "#fff"
     return rx.box(
         rx.cond(
-            news_topic.is_user_subscribed,
+            news_topic.is_user_subscribed == True,
             rx.cond(
-                news_topic.is_selected,
+                news_topic.is_selected == True,
                 rx.icon(tag="check_circle", color="#fff"),
                 rx.icon(tag="check_circle", color="#666"),
             ),  # is_user_subscribed
             rx.cond(
-                news_topic.is_selected,
+                news_topic.is_selected == True,
                 rx.icon(tag="check_circle", color="#666"),
                 rx.icon(tag="check_circle", color="#00000000"),
             ),  # not is_user_subscribed
@@ -36,7 +36,7 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
             align_items="center",
         ),
         background_color=rx.cond(
-            news_topic.is_selected, selected_background_color, not_selected_background_color
+            news_topic.is_selected == True, selected_background_color, not_selected_background_color
         ),
         padding="1rem",
         border_radius="30px",
@@ -61,7 +61,7 @@ def news_topics() -> rx.Component:
             background_color="#f3ec78",
         ),
         rx.cond(
-            NewsTopicsState.is_refreshing_news_topics,
+            NewsTopicsState.is_refreshing_news_topics == True,
             rx.center(rx.circular_progress(is_indeterminate=True, size="100px")),
             rx.vstack(
                 rx.foreach(
@@ -75,7 +75,7 @@ def news_topics() -> rx.Component:
         ),
         rx.center(
             rx.cond(
-                NewsTopicsState.is_updating_user_news_topic_subscriptions,
+                NewsTopicsState.is_updating_user_news_topic_subscriptions == True,
                 rx.circular_progress(is_indeterminate=True, size="100px"),
                 rx.button(
                     "Update",
@@ -94,6 +94,8 @@ def news_topics() -> rx.Component:
                     on_click=[
                         NewsTopicsState.updating_news_topic_subscriptions,
                         NewsTopicsState.update_user_news_topic_subscriptions,
+                        NewsTopicsState.refreshing_news_topics,
+                        NewsTopicsState.refresh_user_news_topics,
                     ],
                 ),
             ),

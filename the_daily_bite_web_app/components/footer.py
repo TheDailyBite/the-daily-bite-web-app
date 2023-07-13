@@ -46,7 +46,9 @@ def footer(style=footer_style):
                 rx.vstack(
                     rx.text("Welcome to The Daily Bite,", color=styles.SUBHEADING_COLOR),
                     rx.text(BaseState.user_name, color=styles.SUBHEADING_COLOR),
-                    rx.cond(BaseState.logged_in, rx.link("Log Out", on_click=BaseState.log_out)),
+                    rx.cond(
+                        BaseState.logged_in == True, rx.link("Log Out", on_click=BaseState.log_out)
+                    ),
                     align_items="start",
                     margin_right="2em",
                 ),
@@ -56,11 +58,13 @@ def footer(style=footer_style):
                         "Threads",
                         href=constants.THREADS_URL,
                         style=footer_item_style,
+                        is_external=True,
                     ),
                     rx.link(
                         "Contact",
                         href=constants.CONTACT_URL,
                         style=footer_item_style,
+                        is_external=True,
                     ),
                     align_items="start",
                 ),
