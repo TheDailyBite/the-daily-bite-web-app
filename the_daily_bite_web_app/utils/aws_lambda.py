@@ -61,6 +61,7 @@ def invoke_function(
             response = requests.post(
                 url,
                 json=function_params,
+                timeout=30,
             )
             if response.status_code != 200:
                 raise RuntimeError(

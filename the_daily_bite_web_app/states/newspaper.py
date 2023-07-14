@@ -272,7 +272,6 @@ class NewspaperState(BaseState):
         yield
 
     def load_newest_articles(self, topic_id: str):
-        # TODO
         # an idea is to simply have a last evaluated key in the scan_index_forward=True direction as well
         # This will be set to the newest article in the newspaper at the first refresh
         # after that it will go on autopilot and keep the newest as the last evaluated key, until None is reached.

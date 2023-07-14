@@ -17,7 +17,7 @@ on_load_all_pages = [BaseState.verify_login]
 
 # Create the app.
 app = rx.App(
-    state=BaseState,  # TODO ?
+    state=BaseState,
     style=styles.BASE_STYLE,
     stylesheets=styles.STYLESHEETS,
 )
@@ -35,7 +35,7 @@ app.add_page(
     title=news_topics.title,
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
-    on_load=[*on_load_all_pages, NewsTopicsState.on_load],  # TODO - add on_load
+    on_load=[*on_load_all_pages, NewsTopicsState.on_load],
 )
 
 app.add_page(
@@ -44,7 +44,7 @@ app.add_page(
     title=newspaper.title,
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
-    on_load=[*on_load_all_pages, NewspaperState.on_load_newspaper],  # TODO - add on_load
+    on_load=[*on_load_all_pages, NewspaperState.on_load_newspaper],
 )
 
 app.add_page(
