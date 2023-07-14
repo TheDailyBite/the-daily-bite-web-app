@@ -35,7 +35,7 @@ python = "^3.9"
 reflex = "^0.2.0"
 boto3 = "^1.26.77"
 requests = "^2.31.0"
-news_aggregator_data_access_layer = { git = "git@github.com:TheDailyBite/news-aggregator-data-access-layer.git", branch = "changes" } # TODO - change to main
+news_aggregator_data_access_layer = { git = "git@github.com:TheDailyBite/news-aggregator-data-access-layer.git", branch = "main" }
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
