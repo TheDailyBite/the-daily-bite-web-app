@@ -1,29 +1,18 @@
 """UI and logic for the navbar component."""
 
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.base_state import State
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.components.sidebar import sidebar as sb
 from the_daily_bite_web_app.pages.index import index
-from the_daily_bite_web_app.pages.news import news_topics, news_topics_subscribe
+from the_daily_bite_web_app.pages.news import news_topics, newspaper
+from the_daily_bite_web_app.states import NavbarState
 
 try:
     from the_daily_bite_web_app.tsclient import client
 except ImportError:
     client = None
-
-
-class NavbarState(State):
-    """The state for the navbar component."""
-
-    # Whether the sidebar is open.
-    sidebar_open: bool = False
-
-    def toggle_sidebar(self):
-        """Toggle the sidebar open state."""
-        self.sidebar_open = not self.sidebar_open
 
 
 # Styles to use for the navbar.
@@ -39,7 +28,7 @@ button_style = {
 }
 
 
-def navbar(sidebar: pc.Component = None) -> pc.Component:
+def navbar(sidebar: rx.Component = None) -> rx.Component:
     """Create the navbar component.
 
     Args:
@@ -49,13 +38,13 @@ def navbar(sidebar: pc.Component = None) -> pc.Component:
     sidebar = sidebar or sb()
 
     # Create the navbar component.
-    return pc.box(
-        pc.hstack(
-            pc.link(
-                pc.hstack(
+    return rx.box(
+        rx.hstack(
+            rx.link(
+                rx.hstack(
                     logo,
-                    pc.tablet_and_desktop(
-                        pc.text(
+                    rx.tablet_and_desktop(
+                        rx.text(
                             "The Daily Bite",
                             font_size=styles.H3_FONT_SIZE,
                             font_weight=600,
@@ -66,27 +55,27 @@ def navbar(sidebar: pc.Component = None) -> pc.Component:
                 href=index.path,
                 _hover={"text_decoration": "none"},
             ),
-            pc.hstack(
-                pc.tablet_and_desktop(
-                    pc.link(
-                        pc.text(
+            rx.hstack(
+                rx.tablet_and_desktop(
+                    rx.link(
+                        rx.text(
                             "News Topics",
                         ),
                         href=news_topics.path,
                         **button_style,
                     ),
                 ),
-                pc.tablet_and_desktop(
-                    pc.link(
-                        pc.text(
-                            "Subscribe to News Topics",
+                rx.tablet_and_desktop(
+                    rx.link(
+                        rx.text(
+                            "Newspaper",
                         ),
-                        href=news_topics_subscribe.path,
+                        href=newspaper.path,
                         **button_style,
                     ),
                 ),
-                pc.mobile_and_tablet(
-                    pc.icon(
+                rx.mobile_and_tablet(
+                    rx.icon(
                         tag="hamburger",
                         on_click=NavbarState.toggle_sidebar,
                         width="1.5em",
@@ -99,12 +88,12 @@ def navbar(sidebar: pc.Component = None) -> pc.Component:
                 ),
                 spacing="1em",
             ),
-            pc.drawer(
-                pc.drawer_overlay(
-                    pc.drawer_content(
-                        pc.hstack(
+            rx.drawer(
+                rx.drawer_overlay(
+                    rx.drawer_content(
+                        rx.hstack(
                             logo,
-                            pc.icon(
+                            rx.icon(
                                 tag="close",
                                 on_click=NavbarState.toggle_sidebar,
                                 width="4em",
@@ -116,7 +105,7 @@ def navbar(sidebar: pc.Component = None) -> pc.Component:
                             justify="space-between",
                             margin_bottom="1.5em",
                         ),
-                        sidebar if sidebar is not None else pc.text("Sidebar"),
+                        sidebar if sidebar is not None else rx.text("Sidebar"),
                         padding_x="2em",
                         padding_top="2em",
                         bg="rgba(255,255,255, 0.97)",

@@ -1,32 +1,22 @@
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.base_state import State
+from the_daily_bite_web_app.constants import INDEX_PATH
+from the_daily_bite_web_app.states import IndexState
 from the_daily_bite_web_app.templates import webpage
 
 
-class IndexState(State):
-    """Hold the state for the home page."""
-
-    # Whether to show the call to action.
-    show_c2a: bool = True
-
-    def close_c2a(self):
-        """Close the call to action."""
-        self.show_c2a = False
-
-
 def landing():
-    return pc.container(
-        pc.vstack(
-            pc.box(
-                pc.text(
+    return rx.container(
+        rx.vstack(
+            rx.box(
+                rx.text(
                     "News. Daily. Bite Sized.",
                     font_size=styles.HERO_FONT_SIZE,
                     font_weight=700,
                     font_family=styles.TEXT_FONT_FAMILY,
                 ),
-                pc.text(
+                rx.text(
                     "Find your favorite news topics, or suggest a new one for us to track.",
                     font_size=styles.HERO_FONT_SIZE,
                     font_weight=800,
@@ -37,7 +27,7 @@ def landing():
                 text_align="center",
                 line_height="1.15",
             ),
-            pc.container(
+            rx.container(
                 "Read informative news on the daily, in a reasonable amount of time!",
                 color="grey",
                 font_size="1.1em",
@@ -49,13 +39,13 @@ def landing():
 
 
 def c2a():
-    return pc.box(
-        pc.button_group(
-            pc.button(
-                pc.link(
-                    pc.box(
-                        "Read the News Daily",
-                        pc.icon(
+    return rx.box(
+        rx.button_group(
+            rx.button(
+                rx.link(
+                    rx.box(
+                        "Suggest a new news topic!",
+                        rx.icon(
                             tag="star",
                             color="#eec600",
                             margin_left="0.2em",
@@ -64,7 +54,7 @@ def c2a():
                         width="100%",
                         height="100%",
                     ),
-                    href=constants.TWITTER_URL,
+                    href=constants.THREADS_URL,
                     _hover={},
                 ),
                 bg=styles.ACCENT_COLOR,
@@ -72,8 +62,8 @@ def c2a():
                 border_color=styles.ACCENT_COLOR_DARK,
                 _hover={"bg": styles.ACCENT_COLOR_DARK},
             ),
-            pc.button(
-                pc.icon(tag="close", color="white", height=".5em", width=".5em"),
+            rx.button(
+                rx.icon(tag="close", color="white", height=".5em", width=".5em"),
                 on_click=IndexState.close_c2a,
                 bg=styles.ACCENT_COLOR,
                 color="white",
@@ -95,15 +85,15 @@ def c2a():
     )
 
 
-@webpage(path="/")
-def index() -> pc.Component:
+@webpage(path=INDEX_PATH)
+def index() -> rx.Component:
     """Get the main The Daily Bite landing page."""
-    return pc.box(
+    return rx.box(
         landing(),
-        pc.cond(
-            IndexState.show_c2a,
-            c2a(),
-        ),
+        # rx.cond(
+        #     IndexState.show_c2a,
+        #     c2a(),
+        # ),
         # background_image="/grid.png",
         # background_repeat="no-repeat",
         # background_position="top",

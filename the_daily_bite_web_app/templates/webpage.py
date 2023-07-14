@@ -1,6 +1,6 @@
 from typing import Callable
 
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app.route import Route
 
@@ -32,7 +32,7 @@ def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:
             The templated route.
         """
 
-        def wrapper(*children, **props) -> pc.Component:
+        def wrapper(*children, **props) -> rx.Component:
             """The template component.
 
             Args:
@@ -47,7 +47,7 @@ def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:
             from the_daily_bite_web_app.components.navbar import navbar
 
             # Wrap the component in the template.
-            return pc.box(
+            return rx.box(
                 navbar(), contents(*children, **props), footer(), font_family="Inter", **props
             )
 

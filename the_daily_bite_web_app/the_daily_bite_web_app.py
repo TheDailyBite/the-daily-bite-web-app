@@ -1,39 +1,63 @@
 """The main the daily bite website."""
 
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import styles
-from the_daily_bite_web_app.base_state import State
+from the_daily_bite_web_app.constants import (
+    INDEX_PATH,
+    LOGIN_PATH,
+    NEWS_TOPICS_PATH,
+    NEWSPAPER_PATH,
+)
 from the_daily_bite_web_app.middleware import CloseSidebarMiddleware
-from the_daily_bite_web_app.pages import routes
+from the_daily_bite_web_app.pages import index, login, news_topics, newspaper
+from the_daily_bite_web_app.states import BaseState, NewspaperState, NewsTopicsState
+
+on_load_all_pages = [BaseState.verify_login]
 
 # Create the app.
-app = pc.App(
-    state=State,
+app = rx.App(
+    state=BaseState,
     style=styles.BASE_STYLE,
     stylesheets=styles.STYLESHEETS,
 )
 
-# Add the pages to the app.
-for route in routes:
-    app.add_page(
-        route.component,
-        route.path,
-        route.title,
-        description="Read informative, well organized news, in easily digestible bites.",
-        image="logo.png",
-    )
+app.add_page(
+    login,
+    route=LOGIN_PATH,
+    description="Read informative, well organized news, in easily digestible bites.",
+    image="logo.png",
+)
 
-# Add the middleware.
+app.add_page(
+    news_topics.component,
+    route=news_topics.path,
+    title=news_topics.title,
+    description="Read informative, well organized news, in easily digestible bites.",
+    image="logo.png",
+    on_load=[*on_load_all_pages, NewsTopicsState.on_load],
+)
+
+app.add_page(
+    newspaper.component,
+    route=newspaper.path,
+    title=newspaper.title,
+    description="Read informative, well organized news, in easily digestible bites.",
+    image="logo.png",
+    on_load=[*on_load_all_pages, NewspaperState.on_load_newspaper],
+)
+
+app.add_page(
+    index.component,
+    route=index.path,
+    title=index.title,
+    description="Read informative, well organized news, in easily digestible bites.",
+    image="logo.png",
+    on_load=[*on_load_all_pages],
+)
+
+
 app.add_middleware(CloseSidebarMiddleware(), index=0)
-
-# Add redirects
-redirects = [
-    # ("/docs", "/docs/getting-started/introduction"),
-]
-
-for source, target in redirects:
-    app.add_page(pc.fragment(), route=source, on_load=pc.redirect(target))
 
 # Run the app.
 app.compile()

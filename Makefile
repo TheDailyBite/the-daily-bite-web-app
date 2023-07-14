@@ -54,7 +54,7 @@ mypy:
 .PHONY: check-safety
 check-safety:
 	poetry check
-	poetry run safety check --full-report --ignore=51457 --ignore=51668 # ignoring CVE-2022-42969 for py <= 1.11.0 which is installed via pytest. No upgrade available. Ignoring Sqlalchemy < 2.0.0b1 vuln due to blocker on pynecone.
+	poetry run safety check --full-report --ignore=51457 --ignore=51668 --ignore=54672 # ignoring CVE-2022-42969 for py <= 1.11.0 which is installed via pytest. No upgrade available. Ignoring Sqlalchemy < 2.0.0b1 vuln due to blocker on pynecone. Ignoring scrapy (54672).
 	poetry run bandit -ll --recursive the_daily_bite_web_app tests
 
 .PHONY: lint
@@ -72,6 +72,7 @@ update-dev-deps:
 docker-build:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
+		--ssh default=${SSH_AUTH_SOCK} \
 		-t $(IMAGE):$(VERSION) . \
 		-f ./docker/Dockerfile --no-cache
 
@@ -82,6 +83,7 @@ docker-build:
 docker-build-with-cache:
 	@echo Building docker $(IMAGE):$(VERSION) ...
 	docker build \
+		--ssh default=${SSH_AUTH_SOCK} \
 		-t $(IMAGE):$(VERSION) . \
 		-f ./docker/Dockerfile	
 

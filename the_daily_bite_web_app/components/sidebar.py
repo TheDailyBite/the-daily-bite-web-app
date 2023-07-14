@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import inspect
 
-import pynecone as pc
-from pynecone.base import Base
+import reflex as rx
+from reflex.base import Base
 
 from the_daily_bite_web_app import styles
 from the_daily_bite_web_app.route import Route
@@ -61,29 +61,29 @@ def get_sidebar_items_news():
             news,
             children=[
                 news.news_topics,
-                news.news_topics_subscribe,
+                news.newspaper,
             ],
         ),
     ]
     return items
 
 
-@pc.memo
+@rx.memo
 def sidebar_leaf(
     item: SidebarItem,
     url: str,
-) -> pc.Component:
+) -> rx.Component:
     """Get the leaf node of the sidebar."""
-    return pc.accordion_item(
-        pc.cond(
+    return rx.accordion_item(
+        rx.cond(
             item.link == url,
-            pc.link(
+            rx.link(
                 item.names,
                 href=item.link,
                 color=styles.ACCENT_COLOR,
                 _hover={"color": styles.ACCENT_COLOR},
             ),
-            pc.link(
+            rx.link(
                 item.names,
                 href=item.link,
                 color=styles.DOC_REG_TEXT_COLOR,
@@ -95,23 +95,23 @@ def sidebar_leaf(
     )
 
 
-@pc.memo
+@rx.memo
 def sidebar_item_comp(
     item: SidebarItem,
     index: list[int],
     url: str,
     first: bool,
 ):
-    return pc.fragment(
-        pc.cond(
+    return rx.fragment(
+        rx.cond(
             item.children.length() == 0,
             sidebar_leaf(item=item, url=url),
-            pc.accordion_item(
-                pc.cond(
+            rx.accordion_item(
+                rx.cond(
                     first,
-                    pc.accordion_button(
-                        pc.accordion_icon(),
-                        pc.text(
+                    rx.accordion_button(
+                        rx.accordion_icon(),
+                        rx.text(
                             item.names,
                             font_family="Inter",
                             font_size="1em",
@@ -121,9 +121,9 @@ def sidebar_item_comp(
                             "color": styles.ACCENT_COLOR,
                         },
                     ),
-                    pc.accordion_button(
-                        pc.accordion_icon(),
-                        pc.text(
+                    rx.accordion_button(
+                        rx.accordion_icon(),
+                        rx.text(
                             item.names,
                             font_family="Inter",
                             font_size="1em",
@@ -134,10 +134,10 @@ def sidebar_item_comp(
                         },
                     ),
                 ),
-                pc.accordion_panel(
-                    pc.accordion(
-                        pc.vstack(
-                            pc.foreach(
+                rx.accordion_panel(
+                    rx.accordion(
+                        rx.vstack(
+                            rx.foreach(
                                 item.children,
                                 lambda child: sidebar_item_comp(
                                     item=child,
@@ -150,7 +150,7 @@ def sidebar_item_comp(
                             border_left="1px solid #e0e0e0",
                         ),
                         allow_multiple=True,
-                        default_index=pc.cond(index, index[1:2], []),
+                        default_index=rx.cond(index, index[1:2], []),
                     ),
                     margin_left="1em",
                 ),
@@ -203,14 +203,14 @@ def get_prev_next(url):
     return None, None
 
 
-@pc.memo
+@rx.memo
 def sidebar_comp(
     url: str,
     news_index: list[int],
 ):
-    return pc.box(
-        pc.heading("News", style=heading_style3),
-        pc.accordion(
+    return rx.box(
+        rx.heading("News", style=heading_style3),
+        rx.accordion(
             *[
                 sidebar_item_comp(
                     item=item,
@@ -223,7 +223,7 @@ def sidebar_comp(
             allow_multiple=True,
             default_index=news_index,
         ),
-        pc.divider(
+        rx.divider(
             margin_bottom="1em",
             margin_top="0.5em",
         ),
@@ -237,11 +237,11 @@ def sidebar_comp(
     )
 
 
-def sidebar(url=None) -> pc.Component:
+def sidebar(url=None) -> rx.Component:
     """Render the sidebar."""
     news_index = calculate_index(news, url)
     # others
-    return pc.box(
+    return rx.box(
         sidebar_comp(
             url=url,
             news_index=news_index,

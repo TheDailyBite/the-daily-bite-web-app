@@ -1,8 +1,9 @@
-import pynecone as pc
+import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.pages.index import index
+from the_daily_bite_web_app.states import BaseState
 
 footer_item_style = {
     "font_family": "Inter",
@@ -13,64 +14,65 @@ footer_item_style = {
 footer_style = {
     "box_shadow": "medium-lg",
     "border_top": "0.2em solid #F0F0F0",
-    "vertical_align": "bottom",
-    "padding_top": "4em",
-    "padding_bottom": "2em",
+    "vertical_align": "top",
+    "padding_top": "0.5em",
+    "padding_bottom": "0.5em",
     "padding_x": styles.PADDING_X2,
     "bg": "white",
 }
 
 
 def footer(style=footer_style):
-    return pc.box(
-        pc.vstack(
-            pc.hstack(
-                pc.desktop_only(
+    return rx.box(
+        rx.hstack(
+            rx.vstack(
+                rx.hstack(
                     logo(
-                        width=["4.28em", "4.28em", "5.35em"],
-                        height=["4em", "4em", "5em"],
+                        width=["72px"],
+                        height=["72px"],
                     ),
+                    rx.text(
+                        "Copyright © 2023 The Daily Bite",
+                        font_weight="500",
+                        color=styles.LIGHT_TEXT_COLOR,
+                        padding_left="0.5em",
+                    ),
+                    align_items="center",
+                    margin_bottom="0.5em",
                 ),
-                pc.vstack(
-                    pc.text("Site", color=styles.SUBHEADING_COLOR),
-                    pc.link("Home", href=index.path, style=footer_item_style),
+                align_items="start",
+            ),
+            rx.hstack(
+                rx.vstack(
+                    rx.text("Welcome to The Daily Bite,", color=styles.SUBHEADING_COLOR),
+                    rx.text(BaseState.user_name, color=styles.SUBHEADING_COLOR),
+                    rx.cond(
+                        BaseState.logged_in == True, rx.link("Log Out", on_click=BaseState.log_out)
+                    ),
                     align_items="start",
+                    margin_right="2em",
                 ),
-                pc.vstack(
-                    pc.text("Resources", color=styles.SUBHEADING_COLOR),
-                    pc.link(
-                        "About",
-                        href="/TODO",
+                rx.vstack(
+                    rx.text("Resources", color=styles.SUBHEADING_COLOR),
+                    rx.link(
+                        "Threads",
+                        href=constants.THREADS_URL,
                         style=footer_item_style,
+                        is_external=True,
                     ),
-                    pc.link(
+                    rx.link(
                         "Contact",
                         href=constants.CONTACT_URL,
                         style=footer_item_style,
-                    ),
-                    pc.link(
-                        "Twitter",
-                        href=constants.TWITTER_URL,
-                        style=footer_item_style,
+                        is_external=True,
                     ),
                     align_items="start",
                 ),
-                justify="space-between",
-                color=styles.LIGHT_TEXT_COLOR,
-                align_items="top",
-                padding_bottom="3em",
-                min_width="100%",
+                align_items="start",
             ),
-            pc.hstack(
-                pc.text(
-                    "Copyright © 2023 The Daily Bite",
-                    font_weight="500",
-                ),
-                justify="space-between",
-                color=styles.LIGHT_TEXT_COLOR,
-                padding_bottom="2em",
-                min_width="100%",
-            ),
+            justify_content="space-between",
+            align_items="start",
         ),
+        color=styles.LIGHT_TEXT_COLOR,
         **style,
     )
