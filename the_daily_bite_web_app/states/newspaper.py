@@ -33,6 +33,9 @@ class NewspaperState(BaseState):
 
     # will be topic id: published date: list of articles
     newspaper: Dict[str, Dict[str, List[NewsArticle]]] = dict()
+    # will be topic id: published date: (expected number of articles, current number of articles)
+    # ideally we'd load this asynchronously
+    # newspaper_inventory_tracker: Dict[str, Dict[str, int]] = dict()
     article_summarization_lengths: List[ArticleSummarizationLength] = [
         ArticleSummarizationLength(
             summarization_length=length.value,
@@ -60,7 +63,7 @@ class NewspaperState(BaseState):
             await asyncio.sleep(2)
             # TODO - can remove this
             if GENERATE_DUMMY_DATA:
-                logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
+                logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data for newspaper topics.")
                 self.newspaper_topics = self.get_test_user_newspaper_topics()
             else:
                 try:
@@ -74,7 +77,7 @@ class NewspaperState(BaseState):
                         {
                             "topic_id": news_topic.topic_id,
                             "topic": news_topic.topic,
-                            "is_selected": False,
+                            "is_selected": True if idx == 0 else False,
                         }
                         for idx, news_topic in enumerate(news_topics)
                         if news_topic.is_published
@@ -251,10 +254,13 @@ class NewspaperState(BaseState):
         """
         logger.info(f"Refreshing newspaper articles...")
         self.newspaper = dict()
+        self._last_fetched_newspaper_article_by_topic = dict()
         self.set_is_refreshing_newspaper(True)
         yield
         if GENERATE_DUMMY_DATA:
-            logger.info(f"GENERATE_DUMMY_DATA is set. Getting dummy data")
+            logger.info(
+                f"GENERATE_DUMMY_DATA is set. Getting dummy data for refresh newspaper articles."
+            )
             self.newspaper = self.get_test_newspaper()
         else:
             for newspaper_topic in self.newspaper_topics:
@@ -265,54 +271,86 @@ class NewspaperState(BaseState):
         self.set_is_refreshing_newspaper(False)
         yield
 
+    def load_newest_articles(self, topic_id: str):
+        # TODO
+        # an idea is to simply have a last evaluated key in the scan_index_forward=True direction as well
+        # This will be set to the newest article in the newspaper at the first refresh
+        # after that it will go on autopilot and keep the newest as the last evaluated key, until None is reached.
+        # Another option... we can also just
+        pass
+
     def load_articles_for_topic(self, topic_id: str, count: int):
-        """Load articles for the given topic id."""
+        """
+        Load articles for the given topic id.
+        NOTE - TODO - this approach is naive since it wouldn't work as expected with articles which are approved after the initial load.
+        Also currently load_newest_articles is not implemented.
+        An option is in the background to use PublishedArticles table and keep track of the expected and actual count
+        and load articles in the newspaper to make sure that at some point these match.
+        """
         logger.info(f"Loading articles for topic id {topic_id}...")
-        articles = dict()
-        sourced_articles = SourcedArticles.query(
-            topic_id,
-            limit=count,
-            scan_index_forward=False,
-            filter_condition=SourcedArticles.article_approval_status
-            == ArticleApprovalStatus.APPROVED,
-            last_evaluated_key=self._last_fetched_newspaper_article_by_topic.get(topic_id),
+        # TODO
+        # load_newest_articles(topic_id)
+        SOME_MAGIC_LAST_EVALUATED_KEY_STRING = "mAgIcLaStEvAlUaTeDkEy"
+        last_evaluated_key = self._last_fetched_newspaper_article_by_topic.get(
+            topic_id, SOME_MAGIC_LAST_EVALUATED_KEY_STRING
         )
-        for sourced_article in sourced_articles:
-            date_published = sourced_article.date_published
-            if date_published not in articles:
-                articles[date_published] = []
-            logger.info(f"Loading article {sourced_article.sourced_article_id}...")
-            articles[date_published].append(
-                NewsArticle(
-                    article_id=sourced_article.sourced_article_id,
-                    title=sourced_article.title,
-                    source_urls=sourced_article.source_article_urls,
-                    published_on_dt=sourced_article.dt_published.isoformat(),
-                    full_summary_text=get_object(
-                        SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
-                    )[0],
-                    medium_summary_text=get_object(
-                        SOURCED_ARTICLES_S3_BUCKET,
-                        sourced_article.medium_summary_ref,
-                    )[0],
-                    short_summary_text=get_object(
-                        SOURCED_ARTICLES_S3_BUCKET,
-                        sourced_article.short_summary_ref,
-                    )[0],
-                )
+        # if it is None in the _last_fetched_newspaper_article_by_topic it means we've processed all articles for this topic
+        # so we're done
+        if last_evaluated_key is not None:
+            articles = dict()
+            if last_evaluated_key == SOME_MAGIC_LAST_EVALUATED_KEY_STRING:
+                # means we've never loaded articles for this topic so we set last evaluated key to None to start
+                last_evaluated_key = None
+            sourced_articles = SourcedArticles.query(
+                topic_id,
+                scan_index_forward=False,
+                filter_condition=SourcedArticles.article_approval_status
+                == ArticleApprovalStatus.APPROVED,
+                last_evaluated_key=last_evaluated_key,
             )
-        if topic_id not in self.newspaper:
-            self.newspaper[topic_id] = articles
-        else:
-            for date_published, articles_on_date in articles.items():
-                if date_published not in self.newspaper[topic_id]:
-                    self.newspaper[topic_id][date_published] = []
-                self.newspaper[topic_id][date_published].extend(articles_on_date)
-        last_evaluated_key = sourced_articles.last_evaluated_key
-        logger.info(f"Topic Id: {topic_id}; Last Evaluated Key: {last_evaluated_key}")
-        # TODO - think of this better
-        # we are fetching new article from the "future" and from the past we have yet fetched
-        self._last_fetched_newspaper_article_by_topic[topic_id] = last_evaluated_key
+            articles_loaded = 0
+            for sourced_article in sourced_articles:
+                date_published = sourced_article.date_published
+                if date_published not in articles:
+                    articles[date_published] = []
+                logger.info(
+                    f"Loading article {sourced_article.sourced_article_id}. Last Evaluated Key {sourced_articles.last_evaluated_key}..."
+                )
+                articles[date_published].append(
+                    NewsArticle(
+                        article_id=sourced_article.sourced_article_id,
+                        title=sourced_article.title,
+                        source_urls=sourced_article.source_article_urls,
+                        published_on_dt=sourced_article.dt_published.isoformat(),
+                        full_summary_text=get_object(
+                            SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
+                        )[0],
+                        medium_summary_text=get_object(
+                            SOURCED_ARTICLES_S3_BUCKET,
+                            sourced_article.medium_summary_ref,
+                        )[0],
+                        short_summary_text=get_object(
+                            SOURCED_ARTICLES_S3_BUCKET,
+                            sourced_article.short_summary_ref,
+                        )[0],
+                    )
+                )
+                articles_loaded += 1
+                if articles_loaded >= count:
+                    break
+            if topic_id not in self.newspaper:
+                self.newspaper[topic_id] = articles
+            else:
+                for date_published, articles_on_date in articles.items():
+                    if date_published not in self.newspaper[topic_id]:
+                        self.newspaper[topic_id][date_published] = []
+                    self.newspaper[topic_id][date_published].extend(articles_on_date)
+            last_evaluated_key = sourced_articles.last_evaluated_key
+            logger.info(
+                f"Topic Id: {topic_id}; Current Last Evaluated Key: {self._last_fetched_newspaper_article_by_topic.get(topic_id)} Last Evaluated Key: {last_evaluated_key}"
+            )
+            logger.info(f"Setting last evaluated key for topic id {topic_id}...")
+            self._last_fetched_newspaper_article_by_topic[topic_id] = last_evaluated_key
 
     @rx.var
     def get_topic_newspaper_articles_no_date(self) -> List[List[NewsArticle]]:
