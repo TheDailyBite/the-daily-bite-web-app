@@ -2,8 +2,8 @@ from typing import Callable
 
 import reflex as rx
 
-from the_daily_bite_web_app.route import Route
 from the_daily_bite_web_app.constants import DEFAULT_TITLE
+from the_daily_bite_web_app.route import Route
 
 
 def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:

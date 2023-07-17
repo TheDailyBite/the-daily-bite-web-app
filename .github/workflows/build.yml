@@ -11,8 +11,7 @@ env:
   DOCKERFILE_PATH: docker/Dockerfile
   IMAGE_TAG: latest
   AWS_REGION: us-west-1
-  WWW_FRONTEND_BUCKET: www.the-daily-bite-web-app-frontend-bucket-dev
-  FRONTEND_BUCKET: the-daily-bite-web-app-frontend-bucket-dev
+  WWW_FRONTEND_BUCKET: www.the-daily-bite-web-app-frontend-dev
 
 jobs:
   build:
@@ -97,7 +96,7 @@ jobs:
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.IMAGE_TAG }}
 
-      - name: Upload Frontend to S3 buckets
+      - name: Upload Frontend export to S3 bucket
         run: |
           # Store the search string and replacement string in variables
           search="__BACKEND_HOST__"
@@ -112,8 +111,11 @@ jobs:
           reflex export --frontend-only
           unzip -d frontend_unzipped frontend.zip
           aws s3 sync --delete frontend_unzipped s3://${{ env.WWW_FRONTEND_BUCKET }}
-          aws s3 sync --delete frontend_unzipped s3://${{ env.FRONTEND_BUCKET }}
           rm -rf frontend_unzipped frontend.zip
+
+      - name: Create Cloudfront Invalidation for distribution since S3 has changed
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.TDB_WEB_APP_FRONTEND_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 
 
 

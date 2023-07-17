@@ -4,6 +4,7 @@ import reflex as rx
 
 from the_daily_bite_web_app import styles
 from the_daily_bite_web_app.constants import (
+    DEFAULT_TITLE,
     INDEX_PATH,
     LOGIN_PATH,
     NEWS_TOPICS_PATH,
@@ -12,7 +13,6 @@ from the_daily_bite_web_app.constants import (
 from the_daily_bite_web_app.middleware import CloseSidebarMiddleware
 from the_daily_bite_web_app.pages import index, login, news_topics, newspaper, not_found
 from the_daily_bite_web_app.states import BaseState, NewspaperState, NewsTopicsState
-from the_daily_bite_web_app.constants import DEFAULT_TITLE
 
 on_load_all_pages = [BaseState.verify_login]
 
