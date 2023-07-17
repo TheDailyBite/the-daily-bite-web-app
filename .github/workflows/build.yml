@@ -11,6 +11,8 @@ env:
   DOCKERFILE_PATH: docker/Dockerfile
   IMAGE_TAG: latest
   AWS_REGION: us-west-1
+  WWW_FRONTEND_BUCKET: www.the-daily-bite-web-app-frontend-bucket-dev
+  FRONTEND_BUCKET: the-daily-bite-web-app-frontend-bucket-dev
 
 jobs:
   build:
@@ -72,7 +74,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.ECR_DEPLOY_ROLE }}
+          role-to-assume: ${{ vars.GH_ACTION_AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION}}
           role-session-name: GithubWebAppWorkflowsSession
 
@@ -94,4 +96,25 @@ jobs:
           ECR_REPOSITORY: ${{ vars.TDB_WEB_APP_ECR_REPO }}
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.IMAGE_TAG }}
+
+      - name: Upload Frontend to S3 buckets
+        run: |
+          # Store the search string and replacement string in variables
+          search="__BACKEND_HOST__"
+          replacement=${{ vars.TDB_WEB_APP_BACKEND_HOST }}
+          echo "Replacing $search with $replacement..."
+          # Specify the file path where you want to perform the replacement
+          config_file_path="the_daily_bite_web_app/config.py"
+          # Use sed to perform the search and replace operation on the file
+          sed -i "s/$search/$replacement/g" "$config_file_path"
+          # show the updated file
+          cat "$config_file_path"
+          reflex export --frontend-only
+          unzip -d frontend_unzipped frontend.zip
+          aws s3 sync --delete frontend_unzipped s3://${{ env.WWW_FRONTEND_BUCKET }}
+          aws s3 sync --delete frontend_unzipped s3://${{ env.FRONTEND_BUCKET }}
+          rm -rf frontend_unzipped frontend.zip
+
+
+
 

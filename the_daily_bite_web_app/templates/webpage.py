@@ -3,8 +3,7 @@ from typing import Callable
 import reflex as rx
 
 from the_daily_bite_web_app.route import Route
-
-DEFAULT_TITLE = "The Daily Bite: informative, bite-sized news."
+from the_daily_bite_web_app.constants import DEFAULT_TITLE
 
 
 def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:

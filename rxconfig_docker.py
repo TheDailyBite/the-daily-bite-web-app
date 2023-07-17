@@ -1,17 +1,19 @@
-import os
-
 import reflex as rx
+from the_daily_bite_web_app import config
+
+from news_aggregator_data_access_layer.utils.telemetry import setup_logger
+logger = setup_logger(__name__)
 
 
 class ThedailybitewebappConfig(rx.Config):
     pass
 
+api_url = f"{config.BACKEND_HOST}:{config.BACKEND_PORT}"
+logger.info(f"api_url: {api_url}")
 
-PORT = os.environ.get("PORT", "8000")
-HOST = os.environ.get("HOST", "http://0.0.0.0")
 
 config = ThedailybitewebappConfig(
     app_name="the_daily_bite_web_app",
-    api_url=f"{HOST}:{PORT}",
+    api_url=api_url,
     bun_path="/app/.bun/bin/bun",
 )

@@ -10,8 +10,9 @@ from the_daily_bite_web_app.constants import (
     NEWSPAPER_PATH,
 )
 from the_daily_bite_web_app.middleware import CloseSidebarMiddleware
-from the_daily_bite_web_app.pages import index, login, news_topics, newspaper
+from the_daily_bite_web_app.pages import index, login, news_topics, newspaper, not_found
 from the_daily_bite_web_app.states import BaseState, NewspaperState, NewsTopicsState
+from the_daily_bite_web_app.constants import DEFAULT_TITLE
 
 on_load_all_pages = [BaseState.verify_login]
 
@@ -25,6 +26,7 @@ app = rx.App(
 app.add_page(
     login,
     route=LOGIN_PATH,
+    title=DEFAULT_TITLE,
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
 )
@@ -56,6 +58,10 @@ app.add_page(
     on_load=[*on_load_all_pages],
 )
 
+app.add_custom_404_page(
+    not_found,
+    title=DEFAULT_TITLE,
+)
 
 app.add_middleware(CloseSidebarMiddleware(), index=0)
 
