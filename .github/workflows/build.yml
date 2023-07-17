@@ -27,7 +27,7 @@ jobs:
         ssh-private-key: |
           ${{ secrets.AGGREGATOR_DAL_CLONE_PRIVATE_KEY }}    
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.5.0
+      uses: actions/setup-python@v4.7.0
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -101,7 +101,7 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.IMAGE_TAG }}
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.5.0
+      uses: actions/setup-python@v4.7.0
       with:
         python-version: ${{ matrix.python-version }}
 
