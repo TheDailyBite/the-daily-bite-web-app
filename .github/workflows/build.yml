@@ -131,6 +131,7 @@ jobs:
         # show the updated file
         cat "$config_file_path"
         source $(poetry env info --path)/bin/activate
+        reflex init
         reflex export --frontend-only
         deactivate
         unzip -d frontend_unzipped frontend.zip
