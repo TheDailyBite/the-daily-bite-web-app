@@ -10,7 +10,7 @@ class ThedailybitewebappConfig(rx.Config):
     pass
 
 
-api_url = f"{config.BACKEND_HOST}:{config.BACKEND_PORT}"
+api_url = f"{config.API_URL}"
 logger.info(f"api_url: {api_url}")
 
 

@@ -10,7 +10,7 @@ permissions:
 env:
   DOCKERFILE_PATH: docker/Dockerfile
   IMAGE_TAG: latest
-  AWS_REGION: us-west-1
+  AWS_REGION: us-east-1
   WWW_FRONTEND_BUCKET: www.the-daily-bite-web-app-frontend-dev
 
 jobs:
@@ -121,8 +121,8 @@ jobs:
     - name: Upload Frontend export to S3 bucket
       run: |
         # Store the search string and replacement string in variables
-        search="__BACKEND_HOST__"
-        replacement=${{ vars.TDB_WEB_APP_BACKEND_HOST }}
+        search="__API_URL__"
+        replacement=${{ vars.TDB_WEB_APP_API_URL }}
         echo "Replacing $search with $replacement..."
         # Specify the file path where you want to perform the replacement
         config_file_path="the_daily_bite_web_app/config.py"
