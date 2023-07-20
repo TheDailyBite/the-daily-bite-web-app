@@ -102,7 +102,7 @@ class NewsTopicsState(BaseState):
                 try:
                     for topic_id in news_topics_to_unsubscribe:
                         logger.info(
-                            f"Unsubscribing user id {self.user.user_id} from topic id {topic_id}"
+                            f"Unsubscribing user id {self.user.user_id} from topic id {topic_id}..."
                         )
                         try:
                             UserTopicSubscriptions(self.user.user_id, topic_id).delete()
