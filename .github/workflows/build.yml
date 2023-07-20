@@ -127,7 +127,7 @@ jobs:
         # Specify the file path where you want to perform the replacement
         config_file_path="the_daily_bite_web_app/config.py"
         # Use sed to perform the search and replace operation on the file
-        sed -i "s/$search/$replacement/g" "$config_file_path"
+        sed -i "s|$search|$replacement|g" "$config_file_path"
         # show the updated file
         cat "$config_file_path"
         source $(poetry env info --path)/bin/activate
