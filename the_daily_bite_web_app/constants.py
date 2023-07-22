@@ -7,4 +7,5 @@ LOGIN_PATH = "/login"
 INDEX_PATH = "/"
 NEWSPAPER_PATH = "/newspaper"
 NEWS_TOPICS_PATH = "/news-topics"
-DEFAULT_TITLE = "The Daily Bite: informative, bite-sized news."
+DEFAULT_TITLE_SUFFIX = " | The Daily Bite: informative, bite-sized news."
+TITLE = "{page_name}%s" % DEFAULT_TITLE_SUFFIX

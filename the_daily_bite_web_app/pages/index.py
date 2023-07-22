@@ -1,7 +1,7 @@
 import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.constants import INDEX_PATH
+from the_daily_bite_web_app.constants import INDEX_PATH, TITLE
 from the_daily_bite_web_app.states import IndexState
 from the_daily_bite_web_app.templates import webpage
 
@@ -21,7 +21,7 @@ def landing():
                     font_size=styles.HERO_FONT_SIZE,
                     font_weight=800,
                     font_family=styles.TEXT_FONT_FAMILY,
-                    background_image="linear-gradient(271.68deg, #EE756A 25%, #756AEE 50%)",
+                    background_image=styles.LINEAR_GRADIENT_TEXT_BACKGROUND,
                     background_clip="text",
                 ),
                 text_align="center",
@@ -34,7 +34,9 @@ def landing():
                 font_family=styles.TEXT_FONT_FAMILY,
                 text_align="center",
             ),
-        )
+        ),
+        margin_top="20px",
+        margin_bottom="20px",
     )
 
 
@@ -85,7 +87,7 @@ def c2a():
     )
 
 
-@webpage(path=INDEX_PATH)
+@webpage(path=INDEX_PATH, title=TITLE.format(page_name="Home"))
 def index() -> rx.Component:
     """Get the main The Daily Bite landing page."""
     return rx.box(

@@ -6,7 +6,6 @@ from the_daily_bite_web_app.pages.index import index
 from the_daily_bite_web_app.states import BaseState
 
 footer_item_style = {
-    "font_family": "Inter",
     "font_weight": "500",
     "_hover": {"color": styles.ACCENT_COLOR},
 }
@@ -14,7 +13,7 @@ footer_item_style = {
 footer_style = {
     "box_shadow": "medium-lg",
     "border_top": "0.2em solid #F0F0F0",
-    "vertical_align": "top",
+    "vertical_align": "bottom",
     "padding_top": "0.5em",
     "padding_bottom": "0.5em",
     "padding_x": styles.PADDING_X2,

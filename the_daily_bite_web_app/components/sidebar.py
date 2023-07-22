@@ -8,6 +8,7 @@ import reflex as rx
 from reflex.base import Base
 
 from the_daily_bite_web_app import styles
+from the_daily_bite_web_app.constants import DEFAULT_TITLE_SUFFIX
 from the_daily_bite_web_app.route import Route
 
 # Sidebar styles.
@@ -45,7 +46,7 @@ class SidebarItem(Base):
 def create_item(route: Route, children=None):
     """Create a sidebar item from a route."""
     if children is None:
-        name = route.title.split(" | The Daily Bite")[0]
+        name = route.title.split(DEFAULT_TITLE_SUFFIX)[0]
         return SidebarItem(names=name, link=route.path)
     return SidebarItem(
         names=inspect.getmodule(route).__name__.split(".")[-1].replace("_", " ").title(),
@@ -113,7 +114,6 @@ def sidebar_item_comp(
                         rx.accordion_icon(),
                         rx.text(
                             item.names,
-                            font_family="Inter",
                             font_size="1em",
                         ),
                         padding_y="0.5em",
@@ -125,7 +125,6 @@ def sidebar_item_comp(
                         rx.accordion_icon(),
                         rx.text(
                             item.names,
-                            font_family="Inter",
                             font_size="1em",
                         ),
                         padding_y="0.2em",
@@ -209,7 +208,6 @@ def sidebar_comp(
     news_index: list[int],
 ):
     return rx.box(
-        rx.heading("News", style=heading_style3),
         rx.accordion(
             *[
                 sidebar_item_comp(

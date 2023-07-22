@@ -32,7 +32,7 @@ classifiers = [  #! Update me
 
 [tool.poetry.dependencies]
 python = "^3.9"
-reflex = "0.2.0" # TODO - this is temporary since 0.2.1 was causing a regression
+reflex = "^0.2.2"
 boto3 = "^1.26.77"
 requests = "^2.31.0"
 news_aggregator_data_access_layer = { git = "git@github.com:TheDailyBite/news-aggregator-data-access-layer.git", branch = "main" }

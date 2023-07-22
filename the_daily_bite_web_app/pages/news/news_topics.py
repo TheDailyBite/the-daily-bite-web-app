@@ -1,7 +1,7 @@
 import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH
+from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH, TITLE
 from the_daily_bite_web_app.states import NewsTopicsState
 from the_daily_bite_web_app.states.models import NewsTopic
 from the_daily_bite_web_app.templates import webpage
@@ -46,7 +46,7 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
     )
 
 
-@webpage(path=NEWS_TOPICS_PATH)
+@webpage(path=NEWS_TOPICS_PATH, title=TITLE.format(page_name="News Topics"))
 def news_topics() -> rx.Component:
     """Get the news topics page."""
     return rx.container(
@@ -54,7 +54,7 @@ def news_topics() -> rx.Component:
             "Subscribe to your favorite News Topics to begin reading its published articles.",
             font_size="30px",
             text_align="center",
-            background_image="linear-gradient(271.68deg, #EE756A 25%, #756AEE 50%)",
+            background_image=styles.LINEAR_GRADIENT_TEXT_BACKGROUND,
             background_clip="text",
             text_fill_color="transparent",
             background_size="100%",
@@ -90,7 +90,7 @@ def news_topics() -> rx.Component:
                     font_size="30px",
                     font_weight="600",
                     border_radius="30px",
-                    background="linear-gradient(90deg, #756AEE 0%, #EE756A 100%)",
+                    background=styles.LINEAR_GRADIENT_BUTTON_BACKGROUND,
                     on_click=[
                         NewsTopicsState.update_user_news_topic_subscriptions,
                         NewsTopicsState.refresh_user_news_topics,

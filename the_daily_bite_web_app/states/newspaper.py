@@ -193,6 +193,7 @@ class NewspaperState(BaseState):
 
     def article_summarization_length_selected(self, idx: int):
         """Set the selected article summarization length."""
+        print(f"Something was clickeddd.... {idx}")
         for i, article_summarization_length in enumerate(self.article_summarization_lengths):
             if i == idx:
                 article_summarization_length.is_selected = True
@@ -320,7 +321,7 @@ class NewspaperState(BaseState):
                         article_id=sourced_article.sourced_article_id,
                         title=sourced_article.title,
                         source_urls=sourced_article.source_article_urls,
-                        published_on_dt=sourced_article.dt_published.isoformat(),
+                        published_on_dt=sourced_article.dt_published.strftime("%Y-%m-%d %H:%M:%S"),
                         full_summary_text=get_object(
                             SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
                         )[0],
@@ -350,6 +351,17 @@ class NewspaperState(BaseState):
             )
             logger.info(f"Setting last evaluated key for topic id {topic_id}...")
             self._last_fetched_newspaper_article_by_topic[topic_id] = last_evaluated_key
+
+    @rx.var
+    def get_selected_topic_name(self) -> str:
+        selected_newspaper_topic = [
+            newspaper_topic
+            for newspaper_topic in self.newspaper_topics
+            if newspaper_topic.is_selected
+        ]
+        if not selected_newspaper_topic:
+            return ""
+        return selected_newspaper_topic[0].topic
 
     @rx.var
     def get_topic_newspaper_articles_no_date(self) -> List[List[NewsArticle]]:

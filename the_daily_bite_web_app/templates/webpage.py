@@ -2,11 +2,10 @@ from typing import Callable
 
 import reflex as rx
 
-from the_daily_bite_web_app.constants import DEFAULT_TITLE
 from the_daily_bite_web_app.route import Route
 
 
-def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:
+def webpage(path: str, title: str, props=None) -> Callable:
     """A template that most pages on the thedailybite.io site should use.
 
     This template wraps the webpage with the navbar and footer.
@@ -20,6 +19,8 @@ def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:
         A wrapper function that returns the full webpage.
     """
     props = props or {}
+    if not title:
+        raise ValueError("Title must be provided.")
 
     def webpage(contents: Callable[[], Route]) -> Route:
         """Wrapper to create a templated route.
@@ -46,9 +47,7 @@ def webpage(path: str, title: str = DEFAULT_TITLE, props=None) -> Callable:
             from the_daily_bite_web_app.components.navbar import navbar
 
             # Wrap the component in the template.
-            return rx.box(
-                navbar(), contents(*children, **props), footer(), font_family="Inter", **props
-            )
+            return rx.box(navbar(), contents(*children, **props), footer(), **props)
 
         return Route(
             path=path,

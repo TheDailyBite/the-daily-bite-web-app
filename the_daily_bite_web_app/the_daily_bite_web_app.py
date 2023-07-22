@@ -4,11 +4,11 @@ import reflex as rx
 
 from the_daily_bite_web_app import styles
 from the_daily_bite_web_app.constants import (
-    DEFAULT_TITLE,
     INDEX_PATH,
     LOGIN_PATH,
     NEWS_TOPICS_PATH,
     NEWSPAPER_PATH,
+    TITLE,
 )
 from the_daily_bite_web_app.middleware import CloseSidebarMiddleware
 from the_daily_bite_web_app.pages import index, login, news_topics, newspaper, not_found
@@ -26,7 +26,7 @@ app = rx.App(
 app.add_page(
     login,
     route=LOGIN_PATH,
-    title=DEFAULT_TITLE,
+    title=TITLE.format(page_name="Login"),
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
 )
@@ -60,7 +60,7 @@ app.add_page(
 
 app.add_custom_404_page(
     not_found,
-    title=DEFAULT_TITLE,
+    title=TITLE.format(page_name="404"),
 )
 
 app.add_middleware(CloseSidebarMiddleware(), index=0)

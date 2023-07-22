@@ -4,7 +4,7 @@ import reflex as rx
 from news_aggregator_data_access_layer.constants import SummarizationLength
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH, NEWSPAPER_PATH
+from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH, NEWSPAPER_PATH, TITLE
 from the_daily_bite_web_app.states.models import (
     ArticleSummarizationLength,
     NewsArticle,
@@ -62,6 +62,7 @@ def to_ui_newspaper_date_section(article_publishing_date: str, idx: int):
             to_ui_article,
         ),
         width="100%",
+        margin_top="1em",
     )
 
 
@@ -69,7 +70,10 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
     title: str = newspaper_article.title
     published_dt: str = newspaper_article.published_on_dt
     return rx.box(
-        rx.heading(title),
+        rx.center(
+            rx.text(title, font_size=styles.H2_FONT_SIZE, font_style="italic", font_weight="light")
+        ),
+        rx.divider(),
         rx.box(
             rx.cond(
                 NewspaperState.get_selected_article_summarization_length.summarization_length
@@ -86,11 +90,9 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
                 == SummarizationLength.SHORT.value,
                 rx.text(newspaper_article.short_summary_text),
             ),
-            padding="1rem",
-            shadow="md",
-            border_width="1px",
-            border_radius="md",
+            padding="1em",
         ),
+        rx.divider(),
         rx.hstack(
             rx.hstack(
                 rx.foreach(
@@ -103,17 +105,26 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
             ),
             rx.text("Published at: " + published_dt),
             justify_content="space-between",
+            margin_top="1em",
         ),
         width="100%",
         shadow="md",
         border_width="1px",
         border_radius="lg",
+        margin_top="2em",
+        padding="1.5em",
     )
 
 
 def topic_newspaper():
     return rx.box(
         rx.vstack(
+            rx.text(
+                "Bites on " + '"' + NewspaperState.get_selected_topic_name + '"',
+                font_size=styles.H1_FONT_SIZE,
+                background_image=styles.LINEAR_GRADIENT_TEXT_BACKGROUND,
+                background_clip="text",
+            ),
             rx.cond(
                 NewspaperState.is_refreshing_newspaper == True,
                 rx.circular_progress(is_indeterminate=True, size="100px"),
@@ -138,98 +149,71 @@ def topic_newspaper():
         ),
         width="100%",
         padding="1rem",
-        shadow="md",
-        border_width="1px",
-        border_radius="md",
+        justify="center",
     )
 
 
-@webpage(path=NEWSPAPER_PATH)
+def option_menus():
+    return rx.hstack(
+        rx.menu(
+            rx.menu_button(
+                rx.hstack(
+                    rx.text("Article Summarization Lengths"),
+                    rx.icon(tag="chevron_down"),
+                    cursor="pointer",
+                )
+            ),
+            rx.menu_list(
+                rx.foreach(
+                    NewspaperState.article_summarization_lengths,
+                    lambda article_summarization_length, idx: rx.link(
+                        rx.menu_item(article_summarization_length.summarization_length),
+                        on_click=NewspaperState.article_summarization_length_selected(idx),
+                    ),
+                ),
+            ),
+        ),
+        rx.menu(
+            rx.menu_button(
+                rx.hstack(rx.text("Newspaper Topic"), rx.icon(tag="chevron_down"), cursor="pointer")
+            ),
+            rx.menu_list(
+                rx.cond(
+                    NewspaperState.has_subscribed_newspaper_topics == True,
+                    rx.foreach(
+                        NewspaperState.get_newspaper_topics,
+                        lambda newspaper_topic, idx: rx.link(
+                            rx.menu_item(newspaper_topic.topic),
+                            on_click=NewspaperState.newspaper_topic_selected(idx),
+                        ),
+                    ),
+                    rx.link(
+                        rx.menu_item("Subscribe to News Topics here!"),
+                        href=NEWS_TOPICS_PATH,
+                    ),
+                ),
+            ),
+        ),
+        margin_bottom="1em",
+        margin_top="0.5em",
+    )
+
+
+@webpage(path=NEWSPAPER_PATH, title=TITLE.format(page_name="Newspaper"))
 def newspaper() -> rx.Component:
     """Get the news topics page."""
-    return rx.hstack(
+    return rx.vstack(
         rx.cond(
-            NewspaperState.has_subscribed_newspaper_topics == True,
-            topic_newspaper(),
-            rx.box(width="100%"),
+            NewspaperState.is_refreshing_newspaper_topics == False,
+            option_menus(),
+            rx.circular_progress(is_indeterminate=True, size="100px"),
         ),
-        rx.vstack(
-            rx.box(
-                rx.text(
-                    "Article Length",
-                    font_size="22px",
-                    font_style="italic",
-                    font_weight="600",
-                    text_align="center",
-                    margin_top="1rem",
-                    text_color="#000",
-                ),
-                rx.divider(),
-                rx.vstack(
-                    rx.foreach(
-                        NewspaperState.article_summarization_lengths,
-                        lambda article_summarization_length, idx: to_ui_article_lengths_button(
-                            article_summarization_length, idx
-                        ),
-                    ),
-                    spacing="1rem",
-                    align_items="center",
-                    margin_top="1rem",
-                    margin_bottom="1rem",
-                ),
-                width="100%",
-                background_color="#fff",
-                shadow="md",
-                border_width="1px",
-                border_radius="md",
+        rx.divider(),
+        rx.hstack(
+            rx.cond(
+                NewspaperState.has_subscribed_newspaper_topics == True,
+                topic_newspaper(),
             ),
-            rx.box(
-                rx.text(
-                    "News Topics",
-                    font_size="22px",
-                    font_style="italic",
-                    font_weight="600",
-                    text_align="center",
-                    margin_top="1rem",
-                    text_color="#000",
-                ),
-                rx.divider(),
-                rx.cond(
-                    NewspaperState.is_refreshing_newspaper_topics == True,
-                    rx.center(rx.circular_progress(is_indeterminate=True, size="100px")),
-                    rx.vstack(
-                        rx.cond(
-                            NewspaperState.has_subscribed_newspaper_topics == True,
-                            rx.foreach(
-                                NewspaperState.get_newspaper_topics,
-                                lambda newspaper_topic, idx: to_ui_newspaper_topic_button(
-                                    newspaper_topic, idx
-                                ),
-                            ),
-                            rx.box(
-                                rx.text(
-                                    "You haven't subscribed to any news topics.",
-                                    text_align="center",
-                                ),
-                                rx.link(
-                                    rx.button("Subscribe to News Topics here!"),
-                                    href=NEWS_TOPICS_PATH,
-                                ),
-                            ),
-                        ),
-                        spacing="1rem",
-                        align_items="center",
-                        margin_top="1rem",
-                        margin_bottom="1rem",
-                    ),
-                ),
-                width="100%",
-                background_color="#fff",
-                shadow="md",
-                border_width="1px",
-                border_radius="md",
-            ),
-            width="20%",
         ),
         margin="1rem",
     )
