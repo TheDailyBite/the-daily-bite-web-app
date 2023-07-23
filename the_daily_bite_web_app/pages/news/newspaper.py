@@ -88,7 +88,7 @@ def topic_newspaper():
                 background_clip="text",
             ),
             rx.cond(
-                NewspaperState.is_refreshing_newspaper == True,
+                NewspaperState.is_refreshing_selected_newspaper_topic == True,
                 rx.circular_progress(is_indeterminate=True, size="100px"),
                 rx.foreach(
                     NewspaperState.get_topic_newspaper_articles_published_dates,
@@ -96,7 +96,7 @@ def topic_newspaper():
                 ),
             ),
             rx.cond(
-                NewspaperState.is_refreshing_newspaper == False,
+                NewspaperState.is_refreshing_selected_newspaper_topic == False,
                 rx.cond(
                     NewspaperState.is_loading_more_articles == True,
                     rx.circular_progress(is_indeterminate=True, size="100px"),
@@ -129,7 +129,15 @@ def option_menus():
                 rx.foreach(
                     NewspaperState.article_summarization_lengths,
                     lambda article_summarization_length, idx: rx.link(
-                        rx.menu_item(article_summarization_length.summarization_length),
+                        rx.menu_item(
+                            rx.hstack(
+                                rx.text(article_summarization_length.summarization_length),
+                                rx.cond(
+                                    article_summarization_length.is_selected == True,
+                                    rx.icon(tag="check_circle"),
+                                ),
+                            )
+                        ),
                         on_click=NewspaperState.article_summarization_length_selected(idx),
                     ),
                 ),
@@ -145,8 +153,19 @@ def option_menus():
                     rx.foreach(
                         NewspaperState.get_newspaper_topics,
                         lambda newspaper_topic, idx: rx.link(
-                            rx.menu_item(newspaper_topic.topic),
-                            on_click=NewspaperState.newspaper_topic_selected(idx),
+                            rx.menu_item(
+                                rx.hstack(
+                                    rx.text(newspaper_topic.topic),
+                                    rx.cond(
+                                        newspaper_topic.is_selected == True,
+                                        rx.icon(tag="check_circle"),
+                                    ),
+                                )
+                            ),
+                            on_click=[
+                                NewspaperState.newspaper_topic_selected(idx),
+                                NewspaperState.refresh_selected_topic_newspaper_articles,
+                            ],
                         ),
                     ),
                     rx.link(
