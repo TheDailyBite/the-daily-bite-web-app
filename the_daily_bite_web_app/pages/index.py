@@ -92,12 +92,5 @@ def index() -> rx.Component:
     """Get the main The Daily Bite landing page."""
     return rx.box(
         landing(),
-        # rx.cond(
-        #     IndexState.show_c2a,
-        #     c2a(),
-        # ),
-        # background_image="/grid.png",
-        # background_repeat="no-repeat",
-        # background_position="top",
-        # width="100%",
+        width="100%",
     )

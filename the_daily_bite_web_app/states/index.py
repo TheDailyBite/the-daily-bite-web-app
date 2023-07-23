@@ -10,3 +10,4 @@ class IndexState(BaseState):
     def close_c2a(self):
         """Close the call to action."""
         self.show_c2a = False
+        yield
