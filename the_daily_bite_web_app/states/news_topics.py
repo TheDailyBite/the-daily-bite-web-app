@@ -56,7 +56,9 @@ class NewsTopicsState(BaseState):
                         {
                             "topic_id": news_topic.topic_id,
                             "topic": news_topic.topic,
-                            "last_publishing_date": news_topic.last_publishing_date.isoformat()
+                            "last_publishing_date": news_topic.last_publishing_date.strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            )
                             if news_topic.last_publishing_date
                             else "",
                             "is_user_subscribed": news_topic.topic_id in user_news_topic_ids,

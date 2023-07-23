@@ -128,7 +128,9 @@ class NewspaperState(BaseState):
                 published_on_dt="2021-01-01T18:59:24.365373",
                 full_summary_text="A full summary text. " * 100,
                 medium_summary_text="A medium summary text. " * 50,
-                short_summary_text="A short summary text. " * 25,
+                short_summary_text=(("A short summary text. " * 10 + "\n\n") * 2).replace(
+                    "\n", "<br>"
+                ),
             ),
             NewsArticle(
                 article_id="id2_topic1",
@@ -137,7 +139,9 @@ class NewspaperState(BaseState):
                 published_on_dt="2021-01-01T18:57:24.365373",
                 full_summary_text="A full summary text 2. " * 100,
                 medium_summary_text="A medium summary text 2. " * 50,
-                short_summary_text="A short summary text. " * 25,
+                short_summary_text=(("A short summary text. " * 10 + "\n\n") * 2).replace(
+                    "\n", "<br>"
+                ),
             ),
             NewsArticle(
                 article_id="id3_topic1",
@@ -146,7 +150,9 @@ class NewspaperState(BaseState):
                 published_on_dt="2021-01-01T18:55:24.365373",
                 full_summary_text="A full summary text 2. " * 100,
                 medium_summary_text="A medium summary text 2. " * 50,
-                short_summary_text="A short summary text. " * 25,
+                short_summary_text=(("A short summary text. " * 10 + "\n\n") * 2).replace(
+                    "\n", "<br>"
+                ),
             ),
         ]
         newspaper["1"]["2021/01/03"] = [
@@ -193,7 +199,6 @@ class NewspaperState(BaseState):
 
     def article_summarization_length_selected(self, idx: int):
         """Set the selected article summarization length."""
-        print(f"Something was clickeddd.... {idx}")
         for i, article_summarization_length in enumerate(self.article_summarization_lengths):
             if i == idx:
                 article_summarization_length.is_selected = True
@@ -324,15 +329,15 @@ class NewspaperState(BaseState):
                         published_on_dt=sourced_article.dt_published.strftime("%Y-%m-%d %H:%M:%S"),
                         full_summary_text=get_object(
                             SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
-                        )[0],
+                        )[0].replace("\n", "<br>"),
                         medium_summary_text=get_object(
                             SOURCED_ARTICLES_S3_BUCKET,
                             sourced_article.medium_summary_ref,
-                        )[0],
+                        )[0].replace("\n", "<br>"),
                         short_summary_text=get_object(
                             SOURCED_ARTICLES_S3_BUCKET,
                             sourced_article.short_summary_ref,
-                        )[0],
+                        )[0].replace("\n", "<br>"),
                     )
                 )
                 articles_loaded += 1

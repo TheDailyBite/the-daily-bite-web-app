@@ -325,14 +325,14 @@ files = [
 
 [[package]]
 name = "certifi"
-version = "2023.5.7"
+version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2023.5.7-py3-none-any.whl", hash = "sha256:c6c2e98f5c7869efca1f8916fed228dd91539f9f1b444c314c06eef02980c716"},
-    {file = "certifi-2023.5.7.tar.gz", hash = "sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7"},
+    {file = "certifi-2023.7.22-py3-none-any.whl", hash = "sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9"},
+    {file = "certifi-2023.7.22.tar.gz", hash = "sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082"},
 ]
 
 [[package]]
@@ -1140,14 +1140,14 @@ idna = ">=2.5"
 
 [[package]]
 name = "identify"
-version = "2.5.25"
+version = "2.5.26"
 description = "File identification library for Python"
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "identify-2.5.25-py2.py3-none-any.whl", hash = "sha256:9df2489842707d431b38ce3410ef8df40da5b10a3e28a3fcac1a42523e956409"},
-    {file = "identify-2.5.25.tar.gz", hash = "sha256:db4de0e758c0db8f81996816cd2f3f2f8c5c8d49a7fd02f3b4109aac6fd80e29"},
+    {file = "identify-2.5.26-py2.py3-none-any.whl", hash = "sha256:c22a8ead0d4ca11f1edd6c9418c3220669b3b7533ada0a0ffa6cc0ef85cf9b54"},
+    {file = "identify-2.5.26.tar.gz", hash = "sha256:7243800bce2f58404ed41b7c002e53d4d22bcf3ae1b7900c2d7aefd95394bf7f"},
 ]
 
 [package.extras]
@@ -1685,7 +1685,7 @@ pynamodb-attributes = "^0.4.0"
 type = "git"
 url = "git@github.com:TheDailyBite/news-aggregator-data-access-layer.git"
 reference = "main"
-resolved_reference = "78934010f57afbcc05f22c8214fe6a75c43610af"
+resolved_reference = "bd36c1a7e9588af281b3628d0b944e6a906775a2"
 
 [[package]]
 name = "news-please"
@@ -2668,14 +2668,14 @@ ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==20.0.1)", "requests (>=2.26.0)"
 
 [[package]]
 name = "reflex"
-version = "0.2.2"
+version = "0.2.3a1"
 description = "Web apps in pure Python."
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "reflex-0.2.2-py3-none-any.whl", hash = "sha256:9e38369dc0376d263ffd60ea143b5207d548da8a966cd11977dcb8e1f6caab13"},
-    {file = "reflex-0.2.2.tar.gz", hash = "sha256:b2be14995ce580467db351b2db700c85ef72ddbbe5a55d28a3fcba46bafa500a"},
+    {file = "reflex-0.2.3a1-py3-none-any.whl", hash = "sha256:c59d5a7e220bfd5ffd006f0aaaa69443e5977bf232b27938e8ed1f53964a9958"},
+    {file = "reflex-0.2.3a1.tar.gz", hash = "sha256:e724e83cd4eaa3595c997698504001449f436a685c2e6a536d27d8fd6f7e22f3"},
 ]
 
 [package.dependencies]
@@ -3849,4 +3849,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "d69458e7d49545ec64088db2e4a992c0ca5e5510f8e491770fdbd8a10d4242c5"
+content-hash = "0f76e84ed4289b64f8bb06313638659e9853d41fcfe30c4b7cbfc1133460e827"

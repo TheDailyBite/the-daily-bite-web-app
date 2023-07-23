@@ -18,7 +18,6 @@ on_load_all_pages = [BaseState.verify_login]
 
 # Create the app.
 app = rx.App(
-    state=BaseState,
     style=styles.BASE_STYLE,
     stylesheets=styles.STYLESHEETS,
 )

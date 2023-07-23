@@ -53,6 +53,7 @@ BASE_STYLE = {
         "background_color": ACCENT_COLOR_LIGHT,
     },
     rx.Text: {"font_family": TEXT_FONT_FAMILY, "font_size": TEXT_FONT_SIZE},
+    rx.Markdown: {"font_family": TEXT_FONT_FAMILY, "font_size": TEXT_FONT_SIZE},
     rx.Heading: {"font_family": TEXT_FONT_FAMILY},
     rx.Divider: {"margin_bottom": "1em", "margin_top": "0.5em"},
 }
