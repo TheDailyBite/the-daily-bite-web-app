@@ -22,6 +22,7 @@ from news_aggregator_data_access_layer.utils.telemetry import setup_logger
 from the_daily_bite_web_app.config import (
     ARTICLES_PER_PAGE,
     GENERATE_DUMMY_DATA,
+    MAX_SOURCES_PER_ARTICLE_IN_UI,
     NEWSPAPER_REFRESH_FREQUENCY_MINS,
 )
 
@@ -363,8 +364,12 @@ class NewspaperState(BaseState):
                     NewsArticle(
                         article_id=sourced_article.sourced_article_id,
                         title=sourced_article.title,
-                        source_urls=sourced_article.source_article_urls,
-                        source_provider_names=sourced_article.providers,
+                        source_urls=sourced_article.source_article_urls[
+                            :MAX_SOURCES_PER_ARTICLE_IN_UI
+                        ],
+                        source_provider_names=sourced_article.providers[
+                            :MAX_SOURCES_PER_ARTICLE_IN_UI
+                        ],
                         published_on_dt=sourced_article.dt_published.strftime("%Y-%m-%d %H:%M:%S"),
                         full_summary_text=get_object(
                             SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
