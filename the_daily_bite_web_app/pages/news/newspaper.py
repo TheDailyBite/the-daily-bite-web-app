@@ -70,7 +70,7 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
                 justify_content="left",
             ),
             rx.vstack(
-                rx.text("Published at:", font_style="italic"),
+                rx.text("First reported at:", font_style="italic"),
                 rx.text(published_dt),
                 justify_content="right",
             ),
