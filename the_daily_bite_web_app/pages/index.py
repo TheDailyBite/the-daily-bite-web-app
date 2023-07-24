@@ -11,7 +11,13 @@ def landing():
         rx.vstack(
             rx.box(
                 rx.text(
-                    "News. Daily. Bite Sized.",
+                    "News. Daily.",
+                    font_size=styles.HERO_FONT_SIZE,
+                    font_weight=700,
+                    font_family=styles.TEXT_FONT_FAMILY,
+                ),
+                rx.text(
+                    "Bite Sized.",
                     font_size=styles.HERO_FONT_SIZE,
                     font_weight=700,
                     font_family=styles.TEXT_FONT_FAMILY,
@@ -28,11 +34,41 @@ def landing():
                 line_height="1.15",
             ),
             rx.container(
-                "Read informative news on the daily, in a reasonable amount of time!",
+                "Read informative news on the daily, in a reasonable amount of time.",
                 color="grey",
                 font_size="1.1em",
                 font_family=styles.TEXT_FONT_FAMILY,
                 text_align="center",
+            ),
+            rx.divider(),
+            rx.vstack(
+                rx.text(
+                    "Suggest a News Topic",
+                    font_size=styles.H2_FONT_SIZE,
+                    font_weight=400,
+                    font_family=styles.TEXT_FONT_FAMILY,
+                    font_style="italic",
+                ),
+                rx.input(
+                    placeholder="e.g. 2024 Election",
+                    value=IndexState.news_topic_suggestion,
+                    on_change=IndexState.set_news_topic_suggestion,
+                ),
+                rx.button(
+                    "Submit",
+                    display="flex",
+                    width="auto",
+                    height="auto",
+                    flex_direction="colum",
+                    justify_content="center",
+                    flex_shrink="0",
+                    color="#FFF",
+                    text_align="center",
+                    border_radius="30px",
+                    background=styles.LINEAR_GRADIENT_BUTTON_BACKGROUND,
+                    on_click=IndexState.suggest_news_topic,
+                ),
+                align_items="center",
             ),
         ),
         margin_top="20px",

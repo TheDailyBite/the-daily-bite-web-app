@@ -56,16 +56,24 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
         ),
         rx.divider(),
         rx.hstack(
-            rx.hstack(
-                rx.foreach(
-                    newspaper_article.source_urls,
-                    lambda source_url, idx: rx.link(
-                        "[" + idx + "]", href=source_url, is_external=True
+            rx.vstack(
+                rx.text("Reported in:", font_style="italic"),
+                rx.hstack(
+                    rx.foreach(
+                        newspaper_article.source_urls,
+                        lambda source_url, idx: rx.link(
+                            "[" + idx + "]", href=source_url, is_external=True
+                        ),
                     ),
+                    spacing="0.25em",
                 ),
-                spacing="0.25em",
+                justify_content="left",
             ),
-            rx.text("Published at: " + published_dt),
+            rx.vstack(
+                rx.text("Published at:", font_style="italic"),
+                rx.text(published_dt),
+                justify_content="right",
+            ),
             justify_content="space-between",
             margin_top="1em",
         ),

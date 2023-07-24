@@ -20,6 +20,7 @@ class NewsArticle(rx.Model):
     article_id: str
     title: str
     source_urls: List[str]
+    source_provider_names: List[str]
     published_on_dt: str
     full_summary_text: str
     medium_summary_text: str

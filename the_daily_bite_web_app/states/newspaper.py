@@ -100,6 +100,7 @@ class NewspaperState(BaseState):
             for newspaper_topic in self.newspaper_topics:
                 if newspaper_topic.topic_id not in self.topic_newspaper_refresh_status:
                     self.topic_newspaper_refresh_status[newspaper_topic.topic_id] = True
+            logger.info(f"Done getting newspaper topics for user {self.user.user_id}...")
             self.set_is_refreshing_newspaper_topics(False)
             yield
         else:
@@ -282,9 +283,8 @@ class NewspaperState(BaseState):
         """Get whether the selected newspaper topic is refreshing."""
         selected_newspaper_topic_id = self.get_selected_newspaper_topic_id()
         if not selected_newspaper_topic_id:
-            # there are none so we will say it is refreshing
-            return True
-        return self.topic_newspaper_refresh_status.get(selected_newspaper_topic_id, True)
+            return False
+        return self.topic_newspaper_refresh_status.get(selected_newspaper_topic_id, False)
 
     async def refresh_selected_topic_newspaper_articles(self):
         """
@@ -296,11 +296,9 @@ class NewspaperState(BaseState):
             return
         logger.info(f"Refreshing newspaper articles {selected_topic_id}...")
         # have refreshed within the last NEWSPAPER_REFRESH_FREQUENCY_MINS minutes
-        if self._last_newspaper_refresh_dt_by_topic.get(
-            selected_topic_id
-        ) is not None and datetime.now(tz=timezone.utc) - self._last_newspaper_refresh_dt_by_topic[
-            selected_topic_id
-        ] < timedelta(
+        if self._last_newspaper_refresh_dt_by_topic.get(selected_topic_id) and datetime.now(
+            tz=timezone.utc
+        ) - self._last_newspaper_refresh_dt_by_topic[selected_topic_id] < timedelta(
             minutes=NEWSPAPER_REFRESH_FREQUENCY_MINS
         ):
             return
@@ -316,6 +314,7 @@ class NewspaperState(BaseState):
         logger.info(f"Refreshing newspaper articles for topic id {selected_topic_id}...")
         self.load_articles_for_topic(selected_topic_id, count=ARTICLES_PER_PAGE)
         self.topic_newspaper_refresh_status[selected_topic_id] = False
+        yield
         self._last_newspaper_refresh_dt_by_topic[selected_topic_id] = datetime.now(tz=timezone.utc)
         yield
 
@@ -365,6 +364,7 @@ class NewspaperState(BaseState):
                         article_id=sourced_article.sourced_article_id,
                         title=sourced_article.title,
                         source_urls=sourced_article.source_article_urls,
+                        source_provider_names=sourced_article.providers,
                         published_on_dt=sourced_article.dt_published.strftime("%Y-%m-%d %H:%M:%S"),
                         full_summary_text=get_object(
                             SOURCED_ARTICLES_S3_BUCKET, sourced_article.full_summary_ref
