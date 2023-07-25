@@ -52,6 +52,41 @@ def news_topics() -> rx.Component:
     return rx.cond(
         NewsTopicsState.logged_in,
         rx.container(
+            rx.box(
+                rx.vstack(
+                    rx.text(
+                        "Suggest a News Topic",
+                        font_size=styles.H2_FONT_SIZE,
+                        font_weight=400,
+                        font_family=styles.TEXT_FONT_FAMILY,
+                        font_style="italic",
+                    ),
+                    rx.input(
+                        placeholder="e.g. 2024 Election",
+                        value=NewsTopicsState.news_topic_suggestion,
+                        on_change=NewsTopicsState.set_news_topic_suggestion,
+                    ),
+                    rx.button(
+                        "Submit",
+                        display="flex",
+                        width="250px",
+                        height="80px",
+                        flex_direction="colum",
+                        justify_content="center",
+                        flex_shrink="0",
+                        color="#FFF",
+                        text_align="center",
+                        font_size="30px",
+                        font_weight="600",
+                        border_radius="30px",
+                        background=styles.LINEAR_GRADIENT_BUTTON_BACKGROUND,
+                        on_click=NewsTopicsState.suggest_news_topic,
+                    ),
+                    align_items="center",
+                ),
+                padding_bottom="40px",
+            ),
+            rx.divider(),
             rx.text(
                 "Subscribe to your favorite News Topics to begin reading its published articles.",
                 font_size="30px",
@@ -95,7 +130,6 @@ def news_topics() -> rx.Component:
                         background=styles.LINEAR_GRADIENT_BUTTON_BACKGROUND,
                         on_click=[
                             NewsTopicsState.update_user_news_topic_subscriptions,
-                            NewsTopicsState.refresh_user_news_topics,
                         ],
                     ),
                 ),

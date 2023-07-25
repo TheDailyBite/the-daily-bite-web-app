@@ -7,12 +7,14 @@ import asyncio
 import reflex as rx
 from news_aggregator_data_access_layer.models.dynamodb import (
     NewsTopics,
+    NewsTopicSuggestions,
     UserTopicSubscriptions,
     get_current_dt_utc_attribute,
 )
 from news_aggregator_data_access_layer.utils.telemetry import setup_logger
 
 from the_daily_bite_web_app.config import GENERATE_DUMMY_DATA
+from the_daily_bite_web_app.constants import NEWSPAPER_PATH
 from the_daily_bite_web_app.utils.aws_lambda import invoke_function
 
 from .base import BaseState
@@ -27,6 +29,17 @@ class NewsTopicsState(BaseState):
     news_topics: List[NewsTopic] = []
     is_refreshing_news_topics: bool = True
     is_updating_user_news_topic_subscriptions: bool = False
+    news_topic_suggestion: Optional[str] = ""
+
+    def suggest_news_topic(self):
+        if self.news_topic_suggestion:
+            NewsTopicSuggestions(
+                user_id=self.user.user_id,
+                topic=self.news_topic_suggestion,
+                created_at=get_current_dt_utc_attribute(),
+            ).save()
+            self.news_topic_suggestion = ""
+            return rx.window_alert("Thank you for your suggestion!")
 
     async def refresh_user_news_topics(self):
         """Get the news topics."""
@@ -87,7 +100,7 @@ class NewsTopicsState(BaseState):
                     f"GENERATE_DUMMY_DATA is set. Fake update user news topic subscriptions. Is Updating {self.is_updating_user_news_topic_subscriptions}"
                 )
                 await asyncio.sleep(2)
-                yield rx.window_alert("News topics subscriptions updated successfully")
+                yield rx.redirect(NEWSPAPER_PATH)
             else:
                 news_topics_to_unsubscribe = [
                     news_topic.topic_id
@@ -132,15 +145,14 @@ class NewsTopicsState(BaseState):
                             )
                             # TODO - emit metric
                             continue
-                    yield rx.window_alert("News topics subscriptions updated successfully")
+                    self.set_is_updating_user_news_topic_subscriptions(False)
+                    yield rx.redirect(NEWSPAPER_PATH)
                 except Exception as e:
                     logger.error(f"Error updating news topic subscriptions: {e}", exc_info=True)
                     # TODO - emit metric
                     yield rx.window_alert(
                         "Error updating news topic subscriptions. Please try again."
                     )
-            self.set_is_updating_user_news_topic_subscriptions(False)
-            yield
         else:
             logger.warning(f"User is not logged in. Cannot update news topic subscriptions")
 

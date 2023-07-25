@@ -1,9 +1,29 @@
 import reflex as rx
 
 from the_daily_bite_web_app import constants, styles
-from the_daily_bite_web_app.constants import INDEX_PATH, TITLE
+from the_daily_bite_web_app.constants import (
+    CONTACT_URL,
+    INDEX_PATH,
+    NEWS_TOPICS_PATH,
+    NEWSPAPER_PATH,
+    TITLE,
+)
 from the_daily_bite_web_app.states import IndexState
 from the_daily_bite_web_app.templates import webpage
+
+
+def list_circle(text):
+    return rx.flex(
+        rx.text(text),
+        width="20px",
+        height="20px",
+        border_radius="6px",
+        bg="#F5EFFE",
+        color="#5646ED",
+        align_items="center",
+        justify_content="center",
+        font_weight="800",
+    )
 
 
 def landing():
@@ -41,95 +61,84 @@ def landing():
                 text_align="center",
             ),
             rx.divider(),
-            rx.vstack(
-                rx.text(
-                    "Suggest a News Topic",
+            rx.box(
+                rx.center(
+                    "How it works",
                     font_size=styles.H2_FONT_SIZE,
-                    font_weight=400,
+                    font_weight=600,
                     font_family=styles.TEXT_FONT_FAMILY,
-                    font_style="italic",
                 ),
-                rx.input(
-                    placeholder="e.g. 2024 Election",
-                    value=IndexState.news_topic_suggestion,
-                    on_change=IndexState.set_news_topic_suggestion,
-                ),
-                rx.button(
-                    "Submit",
-                    display="flex",
-                    width="auto",
-                    height="auto",
-                    flex_direction="colum",
-                    justify_content="center",
-                    flex_shrink="0",
-                    color="#FFF",
-                    text_align="center",
-                    border_radius="30px",
-                    background=styles.LINEAR_GRADIENT_BUTTON_BACKGROUND,
-                    on_click=IndexState.suggest_news_topic,
-                ),
-                align_items="center",
-            ),
-        ),
-        margin_top="20px",
-        margin_bottom="20px",
-    )
-
-
-def c2a():
-    return rx.box(
-        rx.button_group(
-            rx.button(
-                rx.link(
-                    rx.box(
-                        "Suggest a new news topic!",
-                        rx.icon(
-                            tag="star",
-                            color="#eec600",
-                            margin_left="0.2em",
-                            margin_bottom="0.2em",
+                rx.divider(),
+                rx.hstack(
+                    list_circle("1"),
+                    rx.text(
+                        rx.link(
+                            "Subscribe to news topics",
+                            href=NEWS_TOPICS_PATH,
+                            font_family=styles.TEXT_FONT_FAMILY,
                         ),
-                        width="100%",
-                        height="100%",
+                        " that you're interested in reading about...",
+                        font_family=styles.TEXT_FONT_FAMILY,
                     ),
-                    href=constants.THREADS_URL,
-                    _hover={},
                 ),
-                bg=styles.ACCENT_COLOR,
-                color="white",
-                border_color=styles.ACCENT_COLOR_DARK,
-                _hover={"bg": styles.ACCENT_COLOR_DARK},
+                rx.hstack(
+                    list_circle("2"),
+                    rx.text(
+                        rx.link(
+                            "The Newspaper",
+                            href=NEWSPAPER_PATH,
+                            font_family=styles.TEXT_FONT_FAMILY,
+                        ),
+                        " will be where you can read articles on your favorite topics...",
+                        font_family=styles.TEXT_FONT_FAMILY,
+                    ),
+                ),
+                rx.hstack(
+                    list_circle("3"),
+                    rx.text(
+                        "Interested in a specific news topic? ",
+                        rx.link(
+                            "Suggest one here...",
+                            href=NEWS_TOPICS_PATH,
+                            font_family=styles.TEXT_FONT_FAMILY,
+                        ),
+                        font_family=styles.TEXT_FONT_FAMILY,
+                    ),
+                ),
+                rx.hstack(
+                    list_circle("4"),
+                    rx.text(
+                        rx.link(
+                            "Request a feature or give us any feedback",
+                            href=CONTACT_URL,
+                            font_family=styles.TEXT_FONT_FAMILY,
+                            is_external=True,
+                        ),
+                        " you may have (yes, especially the negative ones)...",
+                        font_family=styles.TEXT_FONT_FAMILY,
+                    ),
+                ),
+                padding_top="50px",
+                width="100%",
             ),
-            rx.button(
-                rx.icon(tag="close", color="white", height=".5em", width=".5em"),
-                on_click=IndexState.close_c2a,
-                bg=styles.ACCENT_COLOR,
-                color="white",
-                _hover={"bg": styles.ACCENT_COLOR_DARK},
-            ),
-            opacity="0.95",
-            backdrop_filter="blur(6px)",
-            is_attached=True,
-            variant="outline",
-            box_shadow="xl",
         ),
-        z_index="50",
-        display="flex",
-        justify_content="center",
-        position="fixed",
-        bottom="2em",
-        left="0",
-        right="0",
+        margin_top="30px",
+        margin_bottom="10px",
     )
 
 
-@webpage(path=INDEX_PATH, title=TITLE.format(page_name="Home"))
+@webpage(path=INDEX_PATH, title=TITLE.format(page_name="Home"), props={"min_height": "100%"})
 def index() -> rx.Component:
     """Get the main The Daily Bite landing page."""
     return rx.cond(
         IndexState.logged_in,
-        rx.box(
+        rx.flex(
             landing(),
             width="100%",
+            min_height="100%",
+            flex_direction="column",
+            margin_bottom="4em",
+            display="flex",
+            flex="1",
         ),
     )

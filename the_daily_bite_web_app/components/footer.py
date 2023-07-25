@@ -10,15 +10,7 @@ footer_item_style = {
     "_hover": {"color": styles.ACCENT_COLOR},
 }
 
-footer_style = {
-    "box_shadow": "medium-lg",
-    "border_top": "0.2em solid #F0F0F0",
-    "vertical_align": "bottom",
-    "padding_top": "0.5em",
-    "padding_bottom": "0.5em",
-    "padding_x": styles.PADDING_X2,
-    "bg": "white",
-}
+footer_style = {}
 
 
 def footer(style=footer_style):
@@ -76,6 +68,16 @@ def footer(style=footer_style):
                 align_items="start",
             ),
             color=styles.LIGHT_TEXT_COLOR,
+            bg="rgba(255,255,255, 0.9)",
+            backdrop_filter="blur(10px)",
+            padding_y=["0.8em", "0.8em", "0.5em"],
+            border_top="0.05em solid rgba(100, 116, 139, .2)",
+            position="sticky",
+            padding_x=styles.PADDING_X,
+            width="100%",
+            bottom="0",
+            z_index="99",
+            height="100px",
             **style,
         ),
     )

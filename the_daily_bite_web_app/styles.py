@@ -56,6 +56,7 @@ BASE_STYLE = {
     rx.Markdown: {"font_family": TEXT_FONT_FAMILY, "font_size": TEXT_FONT_SIZE},
     rx.Heading: {"font_family": TEXT_FONT_FAMILY},
     rx.Divider: {"margin_bottom": "1em", "margin_top": "0.5em"},
+    rx.Link: {"font_family": TEXT_FONT_FAMILY, "font_size": TEXT_FONT_SIZE},
 }
 
 # Fonts to include.
