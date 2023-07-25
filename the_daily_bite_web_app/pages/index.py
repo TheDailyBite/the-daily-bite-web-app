@@ -126,7 +126,10 @@ def c2a():
 @webpage(path=INDEX_PATH, title=TITLE.format(page_name="Home"))
 def index() -> rx.Component:
     """Get the main The Daily Bite landing page."""
-    return rx.box(
-        landing(),
-        width="100%",
+    return rx.cond(
+        IndexState.logged_in,
+        rx.box(
+            landing(),
+            width="100%",
+        ),
     )

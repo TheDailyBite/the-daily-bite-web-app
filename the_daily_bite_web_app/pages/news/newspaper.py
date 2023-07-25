@@ -191,17 +191,20 @@ def option_menus():
 @webpage(path=NEWSPAPER_PATH, title=TITLE.format(page_name="Newspaper"))
 def newspaper() -> rx.Component:
     """Get the news topics page."""
-    return rx.vstack(
-        rx.cond(
-            NewspaperState.is_refreshing_newspaper_topics == False,
-            option_menus(),
-        ),
-        rx.divider(),
-        rx.hstack(
+    return rx.cond(
+        NewspaperState.logged_in,
+        rx.vstack(
             rx.cond(
-                NewspaperState.has_subscribed_newspaper_topics == True,
-                topic_newspaper(),
+                NewspaperState.is_refreshing_newspaper_topics == False,
+                option_menus(),
             ),
+            rx.divider(),
+            rx.hstack(
+                rx.cond(
+                    NewspaperState.has_subscribed_newspaper_topics == True,
+                    topic_newspaper(),
+                ),
+            ),
+            margin="1rem",
         ),
-        margin="1rem",
     )

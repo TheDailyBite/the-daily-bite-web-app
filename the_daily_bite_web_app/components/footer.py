@@ -22,56 +22,60 @@ footer_style = {
 
 
 def footer(style=footer_style):
-    return rx.box(
-        rx.hstack(
-            rx.vstack(
-                rx.hstack(
-                    logo(
-                        width=["72px"],
-                        height=["72px"],
-                    ),
-                    rx.text(
-                        "Copyright © 2023 The Daily Bite",
-                        font_weight="500",
-                        color=styles.LIGHT_TEXT_COLOR,
-                        padding_left="0.5em",
-                    ),
-                    align_items="center",
-                    margin_bottom="0.5em",
-                ),
-                align_items="start",
-            ),
+    return rx.cond(
+        BaseState.logged_in,
+        rx.box(
             rx.hstack(
                 rx.vstack(
-                    rx.text("Welcome to The Daily Bite,", color=styles.SUBHEADING_COLOR),
-                    rx.text(BaseState.user_name, color=styles.SUBHEADING_COLOR),
-                    rx.cond(
-                        BaseState.logged_in == True, rx.link("Log Out", on_click=BaseState.log_out)
-                    ),
-                    align_items="start",
-                    margin_right="2em",
-                ),
-                rx.vstack(
-                    rx.text("Resources", color=styles.SUBHEADING_COLOR),
-                    rx.link(
-                        "Threads",
-                        href=constants.THREADS_URL,
-                        style=footer_item_style,
-                        is_external=True,
-                    ),
-                    rx.link(
-                        "Contact",
-                        href=constants.CONTACT_URL,
-                        style=footer_item_style,
-                        is_external=True,
+                    rx.hstack(
+                        logo(
+                            width=["72px"],
+                            height=["72px"],
+                        ),
+                        rx.text(
+                            "Copyright © 2023 The Daily Bite",
+                            font_weight="500",
+                            color=styles.LIGHT_TEXT_COLOR,
+                            padding_left="0.5em",
+                        ),
+                        align_items="center",
+                        margin_bottom="0.5em",
                     ),
                     align_items="start",
                 ),
+                rx.hstack(
+                    rx.vstack(
+                        rx.text("Welcome to The Daily Bite,", color=styles.SUBHEADING_COLOR),
+                        rx.text(BaseState.user_name, color=styles.SUBHEADING_COLOR),
+                        rx.cond(
+                            BaseState.logged_in == True,
+                            rx.link("Log Out", on_click=BaseState.log_out),
+                        ),
+                        align_items="start",
+                        margin_right="2em",
+                    ),
+                    rx.vstack(
+                        rx.text("Resources", color=styles.SUBHEADING_COLOR),
+                        rx.link(
+                            "Threads",
+                            href=constants.THREADS_URL,
+                            style=footer_item_style,
+                            is_external=True,
+                        ),
+                        rx.link(
+                            "Contact",
+                            href=constants.CONTACT_URL,
+                            style=footer_item_style,
+                            is_external=True,
+                        ),
+                        align_items="start",
+                    ),
+                    align_items="start",
+                ),
+                justify_content="space-between",
                 align_items="start",
             ),
-            justify_content="space-between",
-            align_items="start",
+            color=styles.LIGHT_TEXT_COLOR,
+            **style,
         ),
-        color=styles.LIGHT_TEXT_COLOR,
-        **style,
     )
