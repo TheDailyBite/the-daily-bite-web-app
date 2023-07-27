@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import List, Optional
+
 import inspect
 
 import reflex as rx
@@ -40,7 +42,7 @@ class SidebarItem(Base):
     link: str = ""
 
     # The children items.
-    children: list[SidebarItem] = []
+    children: List[SidebarItem] = []
 
 
 def create_item(route: Route, children=None):
@@ -57,15 +59,7 @@ def create_item(route: Route, children=None):
 def get_sidebar_items_news():
     from the_daily_bite_web_app.pages import news
 
-    items = [
-        create_item(
-            news,
-            children=[
-                news.news_topics,
-                news.newspaper,
-            ],
-        ),
-    ]
+    items = [create_item(news.news_topics), create_item(news.newspaper)]
     return items
 
 
@@ -99,7 +93,7 @@ def sidebar_leaf(
 @rx.memo
 def sidebar_item_comp(
     item: SidebarItem,
-    index: list[int],
+    index: List[int],
     url: str,
     first: bool,
 ):
@@ -205,7 +199,7 @@ def get_prev_next(url):
 @rx.memo
 def sidebar_comp(
     url: str,
-    news_index: list[int],
+    news_index: List[int],
 ):
     return rx.box(
         rx.accordion(

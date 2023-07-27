@@ -4,7 +4,6 @@ from typing import Optional
 
 import reflex as rx
 
-from the_daily_bite_web_app.config import GENERATE_DUMMY_DATA
 from the_daily_bite_web_app.constants import LOGIN_PATH
 
 from .models import User
@@ -13,9 +12,7 @@ from .models import User
 class BaseState(rx.State):
     """The base state."""
 
-    user: Optional[User] = (
-        None if not GENERATE_DUMMY_DATA else User(user_id="abc", name="Michael the Admin")
-    )
+    user: Optional[User] = None
 
     def log_out(self):
         self.reset()

@@ -19,17 +19,23 @@ class NewsTopic(rx.Model):
 class NewsArticle(rx.Model):
     article_id: str
     title: str
+    topic_id: str
     source_urls: List[str]
     source_provider_names: List[str]
+    # this is the publishing date for the ui
     published_on_dt: str
-    full_summary_text: str
-    medium_summary_text: str
-    short_summary_text: str
-
-
-class ArticleSummarizationLength(rx.Model):
-    summarization_length: str
-    is_selected: bool
+    # this is the publishing date of the newspaper it is part of (e.g. 2022/01/01)
+    date_published: str
+    full_summary_text: Optional[str]
+    show_full_summary_text: bool = False
+    full_summary_ref: str
+    medium_summary_text: Optional[str]
+    show_medium_summary_text: bool = False
+    medium_summary_ref: str
+    short_summary_text: Optional[str]
+    show_short_summary_text: bool = False
+    short_summary_ref: str
+    show_article: bool = False
 
 
 class NewspaperTopic(rx.Model):

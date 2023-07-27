@@ -7,7 +7,7 @@ from the_daily_bite_web_app.states.models import NewsTopic
 from the_daily_bite_web_app.templates import webpage
 
 
-def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
+def to_ui_news_topic(news_topic: NewsTopic, idx: int):
     selected_background_color = "#756aee59"
     not_selected_background_color = "#fff"
     return rx.box(
@@ -41,7 +41,7 @@ def to_ui_news_topic(news_topic: NewsTopicsState, idx: int):
         padding="1rem",
         border_radius="30px",
         border="1px solid #ddd",
-        on_click=NewsTopicsState.toggle_news_topic_selected(idx),
+        on_click=NewsTopicsState.toggle_news_topic_selected(news_topic),
         _hover={"bg": selected_background_color},
     )
 

@@ -5,11 +5,7 @@ from news_aggregator_data_access_layer.constants import SummarizationLength
 
 from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.constants import NEWS_TOPICS_PATH, NEWSPAPER_PATH, TITLE
-from the_daily_bite_web_app.states.models import (
-    ArticleSummarizationLength,
-    NewsArticle,
-    NewspaperTopic,
-)
+from the_daily_bite_web_app.states.models import NewsArticle, NewspaperTopic
 from the_daily_bite_web_app.states.newspaper import NewspaperState
 from the_daily_bite_web_app.templates import webpage
 
@@ -31,6 +27,108 @@ def to_ui_newspaper_date_section(article_publishing_date: str, idx: int):
 def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
     title: str = newspaper_article.title
     published_dt: str = newspaper_article.published_on_dt
+    read_article_button_component: rx.Component = rx.center(
+        rx.button(
+            "Read Article",
+            on_click=[
+                NewspaperState.set_show_article_property(newspaper_article, True),
+                NewspaperState.set_show_length_property(newspaper_article),
+                NewspaperState.populate_article_text(newspaper_article),
+            ],
+            **styles.BUTTON_LIGHT_NO_BACKGROUND,
+        )
+    )
+    article_length_buttons: rx.Component = rx.flex(
+        rx.cond(
+            newspaper_article.show_short_summary_text,
+            rx.button(
+                "Short",
+                on_click=[
+                    NewspaperState.set_show_length_property(
+                        newspaper_article, SummarizationLength.SHORT.value
+                    ),
+                    NewspaperState.populate_article_text(newspaper_article),
+                ],
+                **styles.BUTTON_LIGHT_SELECTED,
+                margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+                margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+            ),
+            rx.button(
+                "Short",
+                on_click=[
+                    NewspaperState.set_show_length_property(
+                        newspaper_article, SummarizationLength.SHORT.value
+                    ),
+                    NewspaperState.populate_article_text(newspaper_article),
+                ],
+                **styles.BUTTON_LIGHT_NO_BACKGROUND,
+                margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+                margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+            ),
+        ),
+        rx.cond(
+            newspaper_article.show_medium_summary_text,
+            rx.button(
+                "Medium",
+                on_click=[
+                    NewspaperState.set_show_length_property(
+                        newspaper_article, SummarizationLength.MEDIUM.value
+                    ),
+                    NewspaperState.populate_article_text(newspaper_article),
+                ],
+                **styles.BUTTON_LIGHT_SELECTED,
+                margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+                margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+            ),
+            rx.button(
+                "Medium",
+                on_click=[
+                    NewspaperState.set_show_length_property(
+                        newspaper_article, SummarizationLength.MEDIUM.value
+                    ),
+                    NewspaperState.populate_article_text(newspaper_article),
+                ],
+                **styles.BUTTON_LIGHT_NO_BACKGROUND,
+                margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+                margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+            ),
+        ),
+        rx.cond(
+            newspaper_article.show_full_summary_text,
+            rx.button(
+                "Full",
+                on_click=[
+                    NewspaperState.set_show_length_property(
+                        newspaper_article, SummarizationLength.FULL.value
+                    ),
+                    NewspaperState.populate_article_text(newspaper_article),
+                ],
+                **styles.BUTTON_LIGHT_SELECTED,
+                margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+                margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+            ),
+            rx.button(
+                "Full",
+                on_click=[
+                    NewspaperState.set_show_length_property(
+                        newspaper_article, SummarizationLength.FULL.value
+                    ),
+                    NewspaperState.populate_article_text(newspaper_article),
+                ],
+                **styles.BUTTON_LIGHT_NO_BACKGROUND,
+                margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+                margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+            ),
+        ),
+        rx.button(
+            "Hide",
+            on_click=[NewspaperState.set_show_article_property(newspaper_article, False)],
+            **styles.BUTTON_LIGHT_NO_BACKGROUND,
+            margin_bottom=["0.25em", "0.25em", "0.25em", "0em", "0em", "0em"],
+            margin_right=["0em", "0em", "0em", "0.25em", "0.25em", "0.25em"],
+        ),
+        flex_direction=["column", "column", "column", "row", "row", "row"],
+    )
     return rx.box(
         rx.center(
             rx.text(title, font_size=styles.H2_FONT_SIZE, font_style="italic", font_weight="light")
@@ -38,19 +136,25 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
         rx.divider(),
         rx.box(
             rx.cond(
-                NewspaperState.get_selected_article_summarization_length.summarization_length
-                == SummarizationLength.FULL.value,
-                rx.html(newspaper_article.full_summary_text, element="p"),
+                newspaper_article.show_article,
+                rx.cond(
+                    newspaper_article.show_short_summary_text,
+                    rx.html(newspaper_article.short_summary_text, element="p"),
+                ),
             ),
             rx.cond(
-                NewspaperState.get_selected_article_summarization_length.summarization_length
-                == SummarizationLength.MEDIUM.value,
-                rx.html(newspaper_article.medium_summary_text, element="p"),
+                newspaper_article.show_article,
+                rx.cond(
+                    newspaper_article.show_medium_summary_text,
+                    rx.html(newspaper_article.medium_summary_text, element="p"),
+                ),
             ),
             rx.cond(
-                NewspaperState.get_selected_article_summarization_length.summarization_length
-                == SummarizationLength.SHORT.value,
-                rx.html(newspaper_article.short_summary_text, element="p"),
+                newspaper_article.show_article,
+                rx.cond(
+                    newspaper_article.show_full_summary_text,
+                    rx.html(newspaper_article.full_summary_text, element="p"),
+                ),
             ),
             padding="1em",
         ),
@@ -67,12 +171,19 @@ def to_ui_article(newspaper_article: NewsArticle) -> rx.Component:
                     ),
                     spacing="0.25em",
                 ),
-                justify_content="left",
+                align_items="left",
+            ),
+            rx.vstack(
+                rx.cond(
+                    newspaper_article.show_article,
+                    article_length_buttons,
+                    read_article_button_component,
+                ),
             ),
             rx.vstack(
                 rx.text("First reported at:", font_style="italic"),
                 rx.text(published_dt),
-                justify_content="right",
+                align_items="right",
             ),
             justify_content="space-between",
             margin_top="1em",
@@ -108,49 +219,28 @@ def topic_newspaper():
                 rx.cond(
                     NewspaperState.is_loading_more_articles == True,
                     rx.circular_progress(is_indeterminate=True, size="100px"),
-                    rx.button(
-                        "Load More Articles",
-                        on_click=[
-                            NewspaperState.load_more_articles,
-                        ],
+                    rx.center(
+                        rx.button(
+                            "Load More Articles",
+                            on_click=[
+                                NewspaperState.load_more_articles,
+                            ],
+                            **styles.BUTTON_LIGHT_NO_BACKGROUND,
+                        ),
+                        width="100%",
                     ),
                 ),
             ),
         ),
         width="100%",
-        padding="1rem",
-        justify="center",
+        padding_top="1em",
+        padding_bottom="1em",
+        justify_content="center",
     )
 
 
 def option_menus():
     return rx.hstack(
-        rx.menu(
-            rx.menu_button(
-                rx.hstack(
-                    rx.text("Article Summarization Lengths"),
-                    rx.icon(tag="chevron_down"),
-                    cursor="pointer",
-                )
-            ),
-            rx.menu_list(
-                rx.foreach(
-                    NewspaperState.article_summarization_lengths,
-                    lambda article_summarization_length, idx: rx.link(
-                        rx.menu_item(
-                            rx.hstack(
-                                rx.text(article_summarization_length.summarization_length),
-                                rx.cond(
-                                    article_summarization_length.is_selected == True,
-                                    rx.icon(tag="check_circle"),
-                                ),
-                            )
-                        ),
-                        on_click=NewspaperState.article_summarization_length_selected(idx),
-                    ),
-                ),
-            ),
-        ),
         rx.menu(
             rx.menu_button(
                 rx.hstack(rx.text("Newspaper Topic"), rx.icon(tag="chevron_down"), cursor="pointer")

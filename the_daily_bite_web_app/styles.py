@@ -27,6 +27,28 @@ LINK_STYLE = {
     "color": ACCENT_COLOR,
     "text_decoration": "none",
 }
+BUTTON_LIGHT_NO_BACKGROUND = {
+    "border_radius": "6px",
+    "box_shadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14), 0px 1px 2px rgba(31, 25, 68, 0.14);",
+    "bg": "#FFFFFF",
+    "padding_x": ".75em",
+    "border_radius": "8px",
+    "_hover": {
+        "box_shadow": "0px 0px 0px 2px rgba(149, 128, 247, 0.60), 0px 2px 3px 0px rgba(3, 3, 11, 0.01), 0px 1px 2px 0px rgba(84, 82, 95, 0.12), 0px 0px 0px 1px rgba(32, 17, 126, 0.40) inset;",
+    },
+}
+
+BUTTON_LIGHT_SELECTED = {
+    "border_radius": "6px",
+    "box_shadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14), 0px 1px 2px rgba(31, 25, 68, 0.14);",
+    "bg": "#D3D3D3",
+    "padding_x": ".75em",
+    "border_radius": "8px",
+    "_hover": {
+        "box_shadow": "0px 0px 0px 2px rgba(149, 128, 247, 0.60), 0px 2px 3px 0px rgba(3, 3, 11, 0.01), 0px 1px 2px 0px rgba(84, 82, 95, 0.12), 0px 0px 0px 1px rgba(32, 17, 126, 0.40) inset;",
+    },
+}
+
 
 # Doc page styles.
 DOC_HEADER_COLOR = "#000000"
