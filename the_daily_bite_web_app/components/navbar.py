@@ -6,7 +6,7 @@ from the_daily_bite_web_app import constants, styles
 from the_daily_bite_web_app.components.logo import logo
 from the_daily_bite_web_app.components.sidebar import sidebar as sb
 from the_daily_bite_web_app.pages.index import index
-from the_daily_bite_web_app.pages.news import news_topics, newspaper
+from the_daily_bite_web_app.pages.news import news_topics, newsletter, newspaper
 from the_daily_bite_web_app.states import NavbarState
 
 try:
@@ -58,7 +58,16 @@ def navbar(sidebar: rx.Component = None) -> rx.Component:
                     _hover={"text_decoration": "none"},
                 ),
                 rx.hstack(
-                    rx.tablet_and_desktop(
+                    rx.desktop_only(
+                        rx.link(
+                            rx.text(
+                                "Newspaper",
+                            ),
+                            href=newspaper.path,
+                            **button_style,
+                        ),
+                    ),
+                    rx.desktop_only(
                         rx.link(
                             rx.text(
                                 "News Topics",
@@ -67,12 +76,12 @@ def navbar(sidebar: rx.Component = None) -> rx.Component:
                             **button_style,
                         ),
                     ),
-                    rx.tablet_and_desktop(
+                    rx.desktop_only(
                         rx.link(
                             rx.text(
-                                "Newspaper",
+                                "Newsletter",
                             ),
-                            href=newspaper.path,
+                            href=newsletter.path,
                             **button_style,
                         ),
                     ),

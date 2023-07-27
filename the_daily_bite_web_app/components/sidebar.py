@@ -59,7 +59,11 @@ def create_item(route: Route, children=None):
 def get_sidebar_items_news():
     from the_daily_bite_web_app.pages import news
 
-    items = [create_item(news.news_topics), create_item(news.newspaper)]
+    items = [
+        create_item(news.newspaper),
+        create_item(news.news_topics),
+        create_item(news.newsletter),
+    ]
     return items
 
 

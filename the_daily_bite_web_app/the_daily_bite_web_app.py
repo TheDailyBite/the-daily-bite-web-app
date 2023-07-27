@@ -11,7 +11,7 @@ from the_daily_bite_web_app.constants import (
     TITLE,
 )
 from the_daily_bite_web_app.middleware import CloseSidebarMiddleware
-from the_daily_bite_web_app.pages import index, login, news_topics, newspaper, not_found
+from the_daily_bite_web_app.pages import index, login, news_topics, newsletter, newspaper, not_found
 from the_daily_bite_web_app.states import BaseState, NewspaperState, NewsTopicsState
 
 on_load_all_pages = [BaseState.verify_login]
@@ -52,6 +52,15 @@ app.add_page(
     index.component,
     route=index.path,
     title=index.title,
+    description="Read informative, well organized news, in easily digestible bites.",
+    image="logo.png",
+    on_load=[*on_load_all_pages],
+)
+
+app.add_page(
+    newsletter.component,
+    route=newsletter.path,
+    title=newsletter.title,
     description="Read informative, well organized news, in easily digestible bites.",
     image="logo.png",
     on_load=[*on_load_all_pages],
